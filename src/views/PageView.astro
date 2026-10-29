@@ -2,49 +2,44 @@
 import Base from "../layouts/Base.astro";
 import ContactBand from "../components/ContactBand.astro";
 import ServiceIcon from "../components/ServiceIcon.astro";
-import type { Image, Service } from "../lib/cms";
+import type { PageProps } from "../lib/routes";
 import { path, useTranslations, type Locale } from "../lib/i18n";
 
-interface Props {
-  locale: Locale;
-  service: Service;
-  /** Cover image of the CMS page with the same slug, if any; the service model has no image field. */
-  cover: Image | null;
-  others: Service[];
-  alternates: Partial<Record<Locale, string>>;
-}
-const { locale, service, cover, others, alternates } = Astro.props;
+type Props = PageProps & { locale: Locale };
+const { locale, page, service, otherServices, alternates } = Astro.props;
 const t = useTranslations(locale);
+// A page linked from a service is shown as that service: its title, intro and the other services.
+const title = service?.title ?? page.title;
 ---
-<Base locale={locale} section="service" title={service.title} description={service.short ?? undefined} alternates={alternates} image={cover?.src}>
+<Base locale={locale} section={service ? "services" : undefined} title={title} description={service?.short ?? undefined} alternates={alternates} image={page.cover?.src}>
   <article>
     <header class="wrap head">
-      <a class="crumb" href={path("services", locale)}>{t("nav.services")}</a>
+      {service && <a class="crumb" href={path("services", locale)}>{t("nav.services")}</a>}
       <div class="title">
-        <ServiceIcon slug={service.slug} class="icon" />
-        <h1>{service.title}</h1>
+        {service && <ServiceIcon slug={page.slug} class="icon" />}
+        <h1>{title}</h1>
       </div>
-      {service.intro ? <div class="lead" set:html={service.intro} /> : service.short && <p class="lead">{service.short}</p>}
+      {service?.intro ? <div class="lead" set:html={service.intro} /> : service?.short && <p class="lead">{service.short}</p>}
     </header>
 
-    <div class:list={["wrap body", { "has-cover": cover }]}>
-      {service.content && <div class="prose" set:html={service.content} />}
-      {cover && (
+    <div class:list={["wrap body", { "has-cover": page.cover }]}>
+      {page.content && <div class="prose" set:html={page.content} />}
+      {page.cover && (
         <figure class="cover">
-          <img src={cover.src} width={cover.width} height={cover.height} alt="" />
+          <img src={page.cover.src} width={page.cover.width} height={page.cover.height} alt="" />
         </figure>
       )}
     </div>
   </article>
 
-  {others.length > 0 && (
+  {otherServices.some((other) => other.page) && (
     <nav class="wrap others" aria-labelledby="others-title">
       <h2 id="others-title">{t("service.other")}</h2>
       <ul>
-        {others.map((other) => (
+        {otherServices.map((other) => other.page && (
           <li>
-            <a href={path("service", locale, other.slug)}>
-              <ServiceIcon slug={other.slug} class="small-icon" />
+            <a href={other.page.href}>
+              <ServiceIcon slug={other.page.slug} class="small-icon" />
               {other.title}
             </a>
           </li>
@@ -53,7 +48,7 @@ const t = useTranslations(locale);
     </nav>
   )}
 
-  <ContactBand locale={locale} heading={t("service.cta")} body={t("service.ctaBody")} />
+  {service ? <ContactBand locale={locale} heading={t("service.cta")} body={t("service.ctaBody")} /> : <ContactBand locale={locale} />}
 </Base>
 
 <style>
@@ -62,6 +57,8 @@ const t = useTranslations(locale);
   }
 
   .crumb {
+    display: inline-block;
+    margin-bottom: 1.5rem;
     color: var(--slate);
     font-weight: 600;
     text-decoration-color: var(--rose);
@@ -71,7 +68,6 @@ const t = useTranslations(locale);
     display: flex;
     align-items: center;
     gap: 1.25rem;
-    margin-top: 1.5rem;
   }
 
   .icon {

@@ -1,5 +1,5 @@
 ---
-// Line icons for the known services, keyed by CMS slug. Unknown services get an isometric cube.
+// Line icons for the known services, keyed by the slug of the service's CMS page. Unknown services get an isometric cube.
 interface Props { slug: string; class?: string }
 const { slug, class: className, ...rest } = Astro.props;
 
@@ -12,7 +12,6 @@ const icons: Record<string, string> = {
   website: "M3.5 5.5h17v13h-17zM3.5 9.5h17M6.5 7.5h.01M8.8 7.5h.01",
   // A phone.
   "mobile-apps": "M7.5 3h9v18h-9zM11 18h2",
-  applicaties: "M7.5 3h9v18h-9zM11 18h2",
 };
 const fallback = "M12 3l7.8 4.5v9L12 21l-7.8-4.5v-9L12 3Zm0 9l7.8-4.5M12 12v9M12 12L4.2 7.5";
 ---

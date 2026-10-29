@@ -7,6 +7,7 @@
           {
             "id": "e6b243e1-d3dc-415a-8828-932a870807df",
             "modelId": "4b7dbfbb-eaab-44d7-bd4a-8ef1b97d6c0f",
+            "pageParentId": null,
             "url": null,
             "status": "published",
             "data": {
@@ -33,6 +34,7 @@
         "data": {
           "id": "e6b243e1-d3dc-415a-8828-932a870807df",
           "modelId": "4b7dbfbb-eaab-44d7-bd4a-8ef1b97d6c0f",
+          "pageParentId": null,
           "url": null,
           "status": "published",
           "data": {
@@ -41,7 +43,8 @@
               {
                 "id": "dde3a104-8b55-47d8-8a25-aaba9af51789",
                 "modelId": "c14051f7-8f0f-422d-9acf-f568b5c9f1e4",
-                "url": null,
+                "pageParentId": null,
+                "url": "/example-page",
                 "status": "published",
                 "data": {
                   "slug": "example-page",
@@ -111,6 +114,7 @@
         "data": {
           "id": "e6b243e1-d3dc-415a-8828-932a870807df",
           "modelId": "4b7dbfbb-eaab-44d7-bd4a-8ef1b97d6c0f",
+          "pageParentId": null,
           "url": null,
           "status": "published",
           "data": {},
@@ -127,6 +131,7 @@
         "data": {
           "id": "e6b243e1-d3dc-415a-8828-932a870807df",
           "modelId": "4b7dbfbb-eaab-44d7-bd4a-8ef1b97d6c0f",
+          "pageParentId": null,
           "url": null,
           "status": "published",
           "data": {
@@ -148,7 +153,8 @@
           {
             "id": "dde3a104-8b55-47d8-8a25-aaba9af51789",
             "modelId": "c14051f7-8f0f-422d-9acf-f568b5c9f1e4",
-            "url": null,
+            "pageParentId": null,
+            "url": "/example-page",
             "status": "published",
             "data": {
               "slug": "example-page",
@@ -214,7 +220,8 @@
         "data": {
           "id": "dde3a104-8b55-47d8-8a25-aaba9af51789",
           "modelId": "c14051f7-8f0f-422d-9acf-f568b5c9f1e4",
-          "url": null,
+          "pageParentId": null,
+          "url": "/example-page",
           "status": "published",
           "data": {
             "slug": "example-page",
@@ -278,7 +285,8 @@
         "data": {
           "id": "dde3a104-8b55-47d8-8a25-aaba9af51789",
           "modelId": "c14051f7-8f0f-422d-9acf-f568b5c9f1e4",
-          "url": null,
+          "pageParentId": null,
+          "url": "/example-page",
           "status": "published",
           "data": {},
           "publishedAt": "2026-01-01T12:00:00.000Z",
@@ -294,7 +302,8 @@
         "data": {
           "id": "dde3a104-8b55-47d8-8a25-aaba9af51789",
           "modelId": "c14051f7-8f0f-422d-9acf-f568b5c9f1e4",
-          "url": null,
+          "pageParentId": null,
+          "url": "/example-page",
           "status": "published",
           "data": {
             "cover_image": null
@@ -315,6 +324,7 @@
           {
             "id": "af85c549-0c27-461d-8d40-5efbf34f5429",
             "modelId": "ca392046-8f89-471e-979f-fb1dff75642b",
+            "pageParentId": null,
             "url": null,
             "status": "published",
             "data": {
@@ -355,42 +365,10 @@
                   }
                 ]
               },
-              "content": {
-                "type": "doc",
-                "content": [
-                  {
-                    "type": "paragraph",
-                    "content": [
-                      {
-                        "type": "text",
-                        "text": "Synthetic example text",
-                        "marks": [
-                          {
-                            "type": "bold"
-                          }
-                        ]
-                      }
-                    ]
-                  },
-                  {
-                    "type": "asset",
-                    "attrs": {
-                      "assetId": "d59386e0-ae43-4e29-8fbe-0ebcdb954b75",
-                      "asset": {
-                        "id": "d59386e0-ae43-4e29-8fbe-0ebcdb954b75",
-                        "originalName": "example.jpg",
-                        "mimeType": "image/jpeg",
-                        "sizeBytes": 1024,
-                        "imageWidth": 800,
-                        "imageHeight": 600,
-                        "url": "https://example.invalid/synthetic-image.jpg",
-                        "downloadUrl": "https://example.invalid/media/synthetic-image"
-                      }
-                    }
-                  }
-                ]
-              },
-              "slug": "example-page"
+              "page": {
+                "id": "dde3a104-8b55-47d8-8a25-aaba9af51789",
+                "modelId": "c14051f7-8f0f-422d-9acf-f568b5c9f1e4"
+              }
             },
             "publishedAt": "2026-01-01T12:00:00.000Z",
             "createdAt": "2026-01-01T11:00:00.000Z",
@@ -407,6 +385,7 @@
         "data": {
           "id": "af85c549-0c27-461d-8d40-5efbf34f5429",
           "modelId": "ca392046-8f89-471e-979f-fb1dff75642b",
+          "pageParentId": null,
           "url": null,
           "status": "published",
           "data": {
@@ -447,42 +426,65 @@
                 }
               ]
             },
-            "content": {
-              "type": "doc",
-              "content": [
-                {
-                  "type": "paragraph",
+            "page": {
+              "id": "dde3a104-8b55-47d8-8a25-aaba9af51789",
+              "modelId": "c14051f7-8f0f-422d-9acf-f568b5c9f1e4",
+              "pageParentId": null,
+              "url": "/example-page",
+              "status": "published",
+              "data": {
+                "slug": "example-page",
+                "title": "Example text",
+                "cover_image": {
+                  "id": "d59386e0-ae43-4e29-8fbe-0ebcdb954b75",
+                  "originalName": "example.jpg",
+                  "mimeType": "image/jpeg",
+                  "sizeBytes": 1024,
+                  "imageWidth": 800,
+                  "imageHeight": 600,
+                  "url": "https://example.invalid/synthetic-image.jpg",
+                  "downloadUrl": "https://example.invalid/media/synthetic-image"
+                },
+                "content": {
+                  "type": "doc",
                   "content": [
                     {
-                      "type": "text",
-                      "text": "Synthetic example text",
-                      "marks": [
+                      "type": "paragraph",
+                      "content": [
                         {
-                          "type": "bold"
+                          "type": "text",
+                          "text": "Synthetic example text",
+                          "marks": [
+                            {
+                              "type": "bold"
+                            }
+                          ]
                         }
                       ]
+                    },
+                    {
+                      "type": "asset",
+                      "attrs": {
+                        "assetId": "d59386e0-ae43-4e29-8fbe-0ebcdb954b75",
+                        "asset": {
+                          "id": "d59386e0-ae43-4e29-8fbe-0ebcdb954b75",
+                          "originalName": "example.jpg",
+                          "mimeType": "image/jpeg",
+                          "sizeBytes": 1024,
+                          "imageWidth": 800,
+                          "imageHeight": 600,
+                          "url": "https://example.invalid/synthetic-image.jpg",
+                          "downloadUrl": "https://example.invalid/media/synthetic-image"
+                        }
+                      }
                     }
                   ]
-                },
-                {
-                  "type": "asset",
-                  "attrs": {
-                    "assetId": "d59386e0-ae43-4e29-8fbe-0ebcdb954b75",
-                    "asset": {
-                      "id": "d59386e0-ae43-4e29-8fbe-0ebcdb954b75",
-                      "originalName": "example.jpg",
-                      "mimeType": "image/jpeg",
-                      "sizeBytes": 1024,
-                      "imageWidth": 800,
-                      "imageHeight": 600,
-                      "url": "https://example.invalid/synthetic-image.jpg",
-                      "downloadUrl": "https://example.invalid/media/synthetic-image"
-                    }
-                  }
                 }
-              ]
-            },
-            "slug": "example-page"
+              },
+              "publishedAt": "2026-01-01T12:00:00.000Z",
+              "createdAt": "2026-01-01T11:00:00.000Z",
+              "updatedAt": "2026-01-01T12:00:00.000Z"
+            }
           },
           "publishedAt": "2026-01-01T12:00:00.000Z",
           "createdAt": "2026-01-01T11:00:00.000Z",
@@ -497,6 +499,7 @@
         "data": {
           "id": "af85c549-0c27-461d-8d40-5efbf34f5429",
           "modelId": "ca392046-8f89-471e-979f-fb1dff75642b",
+          "pageParentId": null,
           "url": null,
           "status": "published",
           "data": {},
@@ -513,9 +516,12 @@
         "data": {
           "id": "af85c549-0c27-461d-8d40-5efbf34f5429",
           "modelId": "ca392046-8f89-471e-979f-fb1dff75642b",
+          "pageParentId": null,
           "url": null,
           "status": "published",
-          "data": {},
+          "data": {
+            "page": null
+          },
           "publishedAt": "2026-01-01T12:00:00.000Z",
           "createdAt": "2026-01-01T11:00:00.000Z",
           "updatedAt": "2026-01-01T12:00:00.000Z"

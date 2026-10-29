@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "FourD — delivered CMS entries",
-  "x-cms-schemaHash": "94d8ef8dbe222ee89eee187258da7f7b3dafe981b21bbc2126b673efa4255aab",
+  "x-cms-schemaHash": "e770c7772dac9e580671f2b13d3de4fe5246a7bfcd09c97c89d03b462b0bdbbf",
   "anyOf": [
     {
       "$ref": "#/$defs/Entry_4b7dbfbbeaab44d7bd4a8ef1b97d6c0f"
@@ -168,6 +168,17 @@
             }
           ]
         },
+        "pageParentId": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "uuid"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "status": {
           "const": "published",
           "type": "string"
@@ -199,6 +210,7 @@
         "id",
         "modelId",
         "url",
+        "pageParentId",
         "status",
         "data",
         "publishedAt",
@@ -236,6 +248,9 @@
                       "type": "null"
                     }
                   ]
+                },
+                "hierarchy": {
+                  "type": "boolean"
                 }
               },
               "required": [
@@ -515,7 +530,7 @@
                   "x-cms-requiredForPublish": true,
                   "x-cms-isTitle": false,
                   "x-cms-isList": false,
-                  "x-cms-localized": false,
+                  "x-cms-localized": true,
                   "x-cms-config": {
                     "unique": true
                   },
@@ -666,45 +681,58 @@
                     "$ref": "#/$defs/RichTextNode"
                   }
                 },
-                "content": {
-                  "title": "Content",
-                  "description": "rich_text field: content",
-                  "x-cms-fieldType": "rich_text",
-                  "x-cms-requiredForPublish": false,
-                  "x-cms-isTitle": false,
-                  "x-cms-isList": false,
-                  "x-cms-localized": true,
-                  "x-cms-config": {
-                    "richText": {
-                      "code": true,
-                      "links": true,
-                      "lists": true,
-                      "media": true,
-                      "quotes": true,
-                      "headings": true
+                "page": {
+                  "anyOf": [
+                    {
+                      "anyOf": [
+                        {
+                          "allOf": [
+                            {
+                              "$ref": "#/$defs/EntryReference"
+                            },
+                            {
+                              "type": "object",
+                              "properties": {
+                                "modelId": {
+                                  "enum": [
+                                    "c14051f7-8f0f-422d-9acf-f568b5c9f1e4"
+                                  ]
+                                }
+                              },
+                              "required": [
+                                "modelId"
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "$ref": "#/$defs/Entry_c14051f78f0f422d9acff568b5c9f1e4"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "null"
                     }
-                  },
-                  "x-cms-targetModels": [],
-                  "x-cms-editorSchema": {
-                    "$ref": "#/$defs/RichTextNode"
-                  }
-                },
-                "slug": {
-                  "title": "Slug",
-                  "description": "slug field: slug",
-                  "x-cms-fieldType": "slug",
-                  "x-cms-requiredForPublish": false,
+                  ],
+                  "title": "Page",
+                  "description": "component field: page",
+                  "x-cms-fieldType": "component",
+                  "x-cms-requiredForPublish": true,
                   "x-cms-isTitle": false,
                   "x-cms-isList": false,
-                  "x-cms-localized": true,
+                  "x-cms-localized": false,
                   "x-cms-config": {
-                    "unique": true
+                    "isList": false,
+                    "targetModelSlugs": [
+                      "page"
+                    ]
                   },
-                  "x-cms-targetModels": [],
-                  "x-cms-editorSchema": {
-                    "type": "string",
-                    "pattern": "^[a-z0-9_-]+$"
-                  }
+                  "x-cms-targetModels": [
+                    {
+                      "id": "c14051f7-8f0f-422d-9acf-f568b5c9f1e4",
+                      "slug": "page"
+                    }
+                  ]
                 }
               },
               "required": [],

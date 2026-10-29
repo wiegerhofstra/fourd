@@ -2,16 +2,303 @@
   "openapi": "3.1.0",
   "info": {
     "title": "CMS Content API",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "description": "Read-only content delivery. This schema snapshot describes one tenant. Unsupported: writes, draft preview, search, filters other than slug, and custom sorting. Translatable fields resolve per ?locale= with fallback to the default language. Assets can be re-resolved by ID for fresh URLs. The revalidate webhook describes the request the CMS sends to your website. Primitive fields pass through stored JSON; x-cms-editorSchema describes expected editor values, not delivery validation."
   },
-  "x-cms-schemaHash": "94d8ef8dbe222ee89eee187258da7f7b3dafe981b21bbc2126b673efa4255aab",
+  "x-cms-schemaHash": "e770c7772dac9e580671f2b13d3de4fe5246a7bfcd09c97c89d03b462b0bdbbf",
   "servers": [
     {
       "url": "https://cms.fourd.nl"
     }
   ],
   "paths": {
+    "/api/content/{tenantSlug}/resolve": {
+      "get": {
+        "operationId": "resolvePage",
+        "summary": "Resolve a complete page path",
+        "description": "Returns a published page or a redirect instruction in a 200 JSON envelope. Your website sends the HTTP 308. Old paths resolve directly to the latest URL; unpublished/deleted targets and unknown paths return 404. Locale defaults to the tenant default and is not inferred from the path.",
+        "parameters": [
+          {
+            "name": "tenantSlug",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "fourd"
+            },
+            "description": "Must match the tenant associated with the bearer token."
+          },
+          {
+            "name": "path",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "maxLength": 2000,
+              "pattern": "^/(?:[A-Za-z0-9_-]+(?:/[A-Za-z0-9_-]+)*)?$"
+            },
+            "description": "Full website path, including any language/prefix. No trailing slash except /."
+          },
+          {
+            "name": "locale",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "en",
+                "nl"
+              ],
+              "default": "nl"
+            },
+            "description": "Language for translatable fields (x-cms-localized). A field without a translation in this language returns the default-language value. Unknown languages return 400."
+          },
+          {
+            "name": "maxDepth",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 5,
+              "default": 1
+            },
+            "description": "Root counts as depth 1; depth-limited and cyclic components remain compact references."
+          }
+        ],
+        "security": [
+          {
+            "contentToken": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "headers": {
+              "X-Request-Id": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "Include this value when reporting errors."
+              },
+              "Cache-Control": {
+                "schema": {
+                  "const": "private, no-store",
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "oneOf": [
+                        {
+                          "type": "object",
+                          "properties": {
+                            "kind": {
+                              "const": "page"
+                            },
+                            "modelSlug": {
+                              "type": "string"
+                            },
+                            "entry": {
+                              "anyOf": [
+                                {
+                                  "$ref": "#/components/schemas/Entry_4b7dbfbbeaab44d7bd4a8ef1b97d6c0f"
+                                },
+                                {
+                                  "$ref": "#/components/schemas/Entry_c14051f78f0f422d9acff568b5c9f1e4"
+                                },
+                                {
+                                  "$ref": "#/components/schemas/Entry_ca3920468f89471e979ffb1dff75642b"
+                                }
+                              ]
+                            }
+                          },
+                          "required": [
+                            "kind",
+                            "modelSlug",
+                            "entry"
+                          ]
+                        },
+                        {
+                          "type": "object",
+                          "properties": {
+                            "kind": {
+                              "const": "redirect"
+                            },
+                            "location": {
+                              "type": "string"
+                            },
+                            "status": {
+                              "const": 308
+                            }
+                          },
+                          "required": [
+                            "kind",
+                            "location",
+                            "status"
+                          ]
+                        }
+                      ]
+                    },
+                    "meta": {
+                      "type": "object",
+                      "properties": {
+                        "locale": {
+                          "type": "string",
+                          "description": "Language the entries were resolved in."
+                        },
+                        "maxDepth": {
+                          "type": "integer"
+                        }
+                      },
+                      "required": [
+                        "locale",
+                        "maxDepth"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "data",
+                    "meta"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "BAD_REQUEST: invalid query, UUID, cursor, locale or slug filter; expansion limits exceeded.",
+            "headers": {
+              "X-Request-Id": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "Include this value when reporting errors."
+              },
+              "Cache-Control": {
+                "schema": {
+                  "const": "private, no-store",
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "UNAUTHORIZED: missing, malformed, expired, revoked or unknown token.",
+            "headers": {
+              "X-Request-Id": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "Include this value when reporting errors."
+              },
+              "Cache-Control": {
+                "schema": {
+                  "const": "private, no-store",
+                  "type": "string"
+                }
+              },
+              "WWW-Authenticate": {
+                "schema": {
+                  "const": "Bearer",
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "FORBIDDEN: valid token belongs to a different tenant.",
+            "headers": {
+              "X-Request-Id": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "Include this value when reporting errors."
+              },
+              "Cache-Control": {
+                "schema": {
+                  "const": "private, no-store",
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "NOT_FOUND: model, published entry or asset unavailable.",
+            "headers": {
+              "X-Request-Id": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "Include this value when reporting errors."
+              },
+              "Cache-Control": {
+                "schema": {
+                  "const": "private, no-store",
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "INTERNAL_SERVER_ERROR: unexpected server error.",
+            "headers": {
+              "X-Request-Id": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "Include this value when reporting errors."
+              },
+              "Cache-Control": {
+                "schema": {
+                  "const": "private, no-store",
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/content/{tenantSlug}/models": {
       "get": {
         "operationId": "listModels",
@@ -491,7 +778,7 @@
               "minLength": 1,
               "maxLength": 200
             },
-            "description": "Only entries whose slug field equals this value. Translatable slug fields match the slug in the requested locale, falling back to the default-language slug. Use with limit=1 to look up one entry; slugs are unique only when the field is configured so (config.unique)."
+            "description": "Only entries whose slug field equals this value. Translatable slug fields match the slug in the requested locale, falling back to the default-language slug. Hierarchical routing slugs are only unique among siblings; use resolvePage for website routing. Other slugs are unique only when configured so (config.unique)."
           },
           {
             "name": "slugField",
@@ -1353,6 +1640,17 @@
               }
             ]
           },
+          "pageParentId": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
           "status": {
             "const": "published",
             "type": "string"
@@ -1384,6 +1682,7 @@
           "id",
           "modelId",
           "url",
+          "pageParentId",
           "status",
           "data",
           "publishedAt",
@@ -1421,6 +1720,9 @@
                         "type": "null"
                       }
                     ]
+                  },
+                  "hierarchy": {
+                    "type": "boolean"
                   }
                 },
                 "required": [
@@ -1700,7 +2002,7 @@
                     "x-cms-requiredForPublish": true,
                     "x-cms-isTitle": false,
                     "x-cms-isList": false,
-                    "x-cms-localized": false,
+                    "x-cms-localized": true,
                     "x-cms-config": {
                       "unique": true
                     },
@@ -1851,45 +2153,58 @@
                       "$ref": "#/components/schemas/RichTextNode"
                     }
                   },
-                  "content": {
-                    "title": "Content",
-                    "description": "rich_text field: content",
-                    "x-cms-fieldType": "rich_text",
-                    "x-cms-requiredForPublish": false,
-                    "x-cms-isTitle": false,
-                    "x-cms-isList": false,
-                    "x-cms-localized": true,
-                    "x-cms-config": {
-                      "richText": {
-                        "code": true,
-                        "links": true,
-                        "lists": true,
-                        "media": true,
-                        "quotes": true,
-                        "headings": true
+                  "page": {
+                    "anyOf": [
+                      {
+                        "anyOf": [
+                          {
+                            "allOf": [
+                              {
+                                "$ref": "#/components/schemas/EntryReference"
+                              },
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "modelId": {
+                                    "enum": [
+                                      "c14051f7-8f0f-422d-9acf-f568b5c9f1e4"
+                                    ]
+                                  }
+                                },
+                                "required": [
+                                  "modelId"
+                                ]
+                              }
+                            ]
+                          },
+                          {
+                            "$ref": "#/components/schemas/Entry_c14051f78f0f422d9acff568b5c9f1e4"
+                          }
+                        ]
+                      },
+                      {
+                        "type": "null"
                       }
-                    },
-                    "x-cms-targetModels": [],
-                    "x-cms-editorSchema": {
-                      "$ref": "#/components/schemas/RichTextNode"
-                    }
-                  },
-                  "slug": {
-                    "title": "Slug",
-                    "description": "slug field: slug",
-                    "x-cms-fieldType": "slug",
-                    "x-cms-requiredForPublish": false,
+                    ],
+                    "title": "Page",
+                    "description": "component field: page",
+                    "x-cms-fieldType": "component",
+                    "x-cms-requiredForPublish": true,
                     "x-cms-isTitle": false,
                     "x-cms-isList": false,
-                    "x-cms-localized": true,
+                    "x-cms-localized": false,
                     "x-cms-config": {
-                      "unique": true
+                      "isList": false,
+                      "targetModelSlugs": [
+                        "page"
+                      ]
                     },
-                    "x-cms-targetModels": [],
-                    "x-cms-editorSchema": {
-                      "type": "string",
-                      "pattern": "^[a-z0-9_-]+$"
-                    }
+                    "x-cms-targetModels": [
+                      {
+                        "id": "c14051f7-8f0f-422d-9acf-f568b5c9f1e4",
+                        "slug": "page"
+                      }
+                    ]
                   }
                 },
                 "required": [],

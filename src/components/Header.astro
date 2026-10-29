@@ -16,9 +16,9 @@ try {
 }
 
 const items = [
-  { href: path("services", locale), label: t("nav.services"), current: section === "services" || section === "service" },
+  { href: path("services", locale), label: t("nav.services"), current: section === "services" },
   { href: path("work", locale), label: t("nav.work"), current: section === "work" },
-  ...cmsItems.map((item) => ({ href: path("page", locale, item.slug), label: item.title, current: Astro.url.pathname === path("page", locale, item.slug) })),
+  ...cmsItems.map((item) => ({ href: item.href, label: item.title, current: Astro.url.pathname === item.href })),
   { href: path("contact", locale), label: t("nav.contact"), current: section === "contact" },
 ];
 const languageNames: Record<Locale, string> = { nl: "Nederlands", en: "English" };

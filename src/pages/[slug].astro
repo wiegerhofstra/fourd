@@ -1,9 +1,0 @@
----
-import CmsPageView from "../views/CmsPageView.astro";
-import NotFoundView from "../views/NotFoundView.astro";
-import { loadPage } from "../lib/routes";
-
-const result = await loadPage(Astro.params.slug, "nl");
-if (result.status !== 200) Astro.response.status = result.status;
----
-{result.status === 200 ? <CmsPageView locale="nl" {...result.props} /> : <NotFoundView locale="nl" unavailable={result.status === 503} />}

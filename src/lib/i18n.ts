@@ -9,20 +9,26 @@ export function isLocale(value: unknown): value is Locale {
   return typeof value === "string" && (locales as readonly string[]).includes(value);
 }
 
-/** Route keys map to the path of each page per language. Dutch paths match the previous site. */
+/** Route keys map to the path of each fixed section per language. Dutch paths match the previous site. */
 const routes = {
   home: { nl: "/", en: "/en/" },
   services: { nl: "/diensten", en: "/en/services" },
-  service: { nl: "/diensten/{slug}", en: "/en/services/{slug}" },
   work: { nl: "/ons-werk", en: "/en/work" },
   contact: { nl: "/contact", en: "/en/contact" },
-  page: { nl: "/{slug}", en: "/en/{slug}" },
 } as const;
 export type RouteKey = keyof typeof routes;
 
-export function path(route: RouteKey, locale: Locale, slug?: string) {
-  const pattern: string = routes[route][locale];
-  return slug === undefined ? pattern : pattern.replace("{slug}", encodeURIComponent(slug));
+export function path(route: RouteKey, locale: Locale) {
+  return routes[route][locale];
+}
+
+/** English pages live under /en; the CMS returns page paths without a language prefix. */
+const prefixes: Record<Locale, string> = { nl: "", en: "/en" };
+
+/** Turns a CMS page path ("/maatwerk") into this site's URL for the language ("/en/maatwerk"). */
+export function localize(cmsPath: string, locale: Locale) {
+  const prefix = prefixes[locale];
+  return prefix && cmsPath === "/" ? prefix + "/" : prefix + cmsPath;
 }
 
 export const company = {

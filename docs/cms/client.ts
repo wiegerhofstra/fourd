@@ -1,5 +1,5 @@
 // Server-only client. Keep tokens out of browser bundles and public environment variables.
-import type { DeliveryAsset, DeliveryEntry, EntryByModel, Model, ModelDetail } from "./types";
+import type { DeliveryAsset, DeliveryEntry, EntryByModel, Model, ModelDetail, PageResolution } from "./types";
 
 export type PageOptions = {
   limit?: number; cursor?: string; maxDepth?: number; locale?: string; signal?: AbortSignal;
@@ -80,7 +80,20 @@ export function createCmsClient(config: CmsClientConfig) {
       meta(body, false);
       return body as unknown as { data: EntryFor<M>; meta: { maxDepth: number; locale?: string } };
     },
-    /** The newest published entry with this slug (in options.locale), or null. */
+    /** Resolve a canonical page or permanent redirect by its FULL website path. */
+    async resolvePage(path: string, options: Pick<PageOptions, "maxDepth" | "locale" | "signal"> = {}): Promise<{ data: PageResolution; meta: { maxDepth: number; locale: string } }> {
+      bounded(options.maxDepth, 5, "maxDepth");
+      const body = await request(tenantBase + "/resolve", { path, maxDepth: options.maxDepth, locale: options.locale }, options.signal);
+      meta(body, false);
+      const data = body.data as Partial<PageResolution> | null;
+      if (!data || (data.kind !== "page" && data.kind !== "redirect")
+        || (data.kind === "page" && (typeof data.modelSlug !== "string" || !data.entry || typeof data.entry !== "object" || !("data" in data.entry)))
+        || (data.kind === "redirect" && (data.status !== 308 || typeof data.location !== "string" || !data.location.startsWith("/") || data.location.startsWith("//") || data.location.includes(String.fromCharCode(92))))) {
+        throw new CmsApiError(200, "INVALID_RESPONSE", "CMS page resolution is invalid", null);
+      }
+      return body as unknown as { data: PageResolution; meta: { maxDepth: number; locale: string } };
+    },
+    /** Newest matching entry, or null. Hierarchical page slugs may repeat: use resolvePage for routing. */
     async findEntryBySlug<M extends string>(model: M, slug: string, options: Pick<PageOptions, "maxDepth" | "locale" | "slugField" | "signal"> = {}): Promise<EntryFor<M> | null> {
       const page = await listEntries(model, { ...options, slug, limit: 1 });
       return page.data[0] ?? null;

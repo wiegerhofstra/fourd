@@ -2,7 +2,7 @@
 // Raw fields use unknown because delivery does not validate their stored JSON.
 export type EntryReference = { id: string; modelId: string };
 export type DeliveryEntry<T = Record<string, unknown>> = EntryReference & {
-  url: string | null; status: "published"; data: T; publishedAt: string | null; createdAt: string; updatedAt: string;
+  url: string | null; pageParentId: string | null; status: "published"; data: T; publishedAt: string | null; createdAt: string; updatedAt: string;
 };
 export type DeliveryAsset = {
   id: string; originalName: string; mimeType: string; sizeBytes: number;
@@ -13,7 +13,8 @@ export type RichTextNode = {
   attrs?: Record<string, unknown> & { assetId?: string; asset?: DeliveryAsset | null };
   marks?: Array<{ type: string; attrs?: Record<string, unknown> }>;
 };
-export type PageUrlConfig = { pattern: string; slugField: string | null };
+export type PageUrlConfig = { pattern: string; slugField: string | null; hierarchy?: boolean };
+export type PageResolution = { kind: "page"; modelSlug: string; entry: DeliveryEntry } | { kind: "redirect"; location: string; status: 308 };
 export type Model = { id: string; name: string; slug: string; pageUrl: PageUrlConfig | null; status: "active" | "archived"; createdAt: string; updatedAt: string };
 export type Field = {
   id: string; key: string; label: string; type: "text" | "rich_text" | "url" | "number" | "boolean" | "date" | "time" | "enum" | "asset" | "component" | "slug";
@@ -37,8 +38,7 @@ export type EntryByModel = {
     "title"?: unknown;
     "short"?: unknown;
     "intro"?: unknown;
-    "content"?: unknown;
-    "slug"?: unknown;
+    "page"?: EntryReference | EntryByModel["page"] | null;
     [key: string]: unknown;
   }> & { modelId: "ca392046-8f89-471e-979f-fb1dff75642b" };
 };
@@ -58,8 +58,7 @@ export type ExpectedDataByModel = {
     "title"?: string | null;
     "short"?: string | null;
     "intro"?: RichTextNode | null;
-    "content"?: RichTextNode | null;
-    "slug"?: string | null;
+    "page"?: EntryReference | EntryByModel["page"] | null;
   };
 };
 export const modelSlugById: Record<string, string> = {

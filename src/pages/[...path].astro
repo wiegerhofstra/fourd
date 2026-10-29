@@ -1,0 +1,11 @@
+---
+// Every path not owned by a fixed section is resolved by the CMS: a page, a permanent redirect, or a 404.
+import PageView from "../views/PageView.astro";
+import NotFoundView from "../views/NotFoundView.astro";
+import { cmsPath, loadPage } from "../lib/routes";
+
+const result = await loadPage(cmsPath(Astro.params.path), "nl");
+if (result.status === 308) return Astro.redirect(result.location, 308);
+if (result.status !== 200) Astro.response.status = result.status;
+---
+{result.status === 200 ? <PageView locale="nl" {...result.props} /> : <NotFoundView locale="nl" unavailable={result.status === 503} />}

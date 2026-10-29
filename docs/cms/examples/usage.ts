@@ -13,6 +13,8 @@ export async function loadExample(entryId: string, assetId?: string) {
   const modelSlug = "menu";
   if (!modelSlug) return { models, entries: [] };
   const model = await cms.getModel(modelSlug);
+  // Website routing: cms.resolvePage("/services/contact", { locale: "en" }).
+  // Render kind=page, send HTTP 308 for kind=redirect, handle API 404 as a missing page.
   const page = await cms.listEntries(modelSlug, { limit: 20, maxDepth: 2 });
   // locale selects translations; untranslated fields return the default-language value.
   const detail = await cms.getEntry(modelSlug, entryId, { maxDepth: 2, locale: "nl" });

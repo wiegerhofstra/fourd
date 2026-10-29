@@ -1,5 +1,5 @@
 {
-  "formatVersion": "1.0.0",
+  "formatVersion": "1.1.0",
   "tenant": {
     "name": "FourD",
     "slug": "fourd",
@@ -52,7 +52,10 @@
       "id": "c14051f7-8f0f-422d-9acf-f568b5c9f1e4",
       "name": "Page",
       "slug": "page",
-      "pageUrl": null,
+      "pageUrl": {
+        "pattern": "/{slug}",
+        "slugField": "slug"
+      },
       "status": "active",
       "fields": [
         {
@@ -62,7 +65,7 @@
           "required": true,
           "isList": false,
           "isTitle": false,
-          "localized": false,
+          "localized": true,
           "config": {
             "unique": true
           },
@@ -166,43 +169,27 @@
           "targetModelIds": []
         },
         {
-          "key": "content",
-          "label": "Content",
-          "type": "rich_text",
-          "required": false,
+          "key": "page",
+          "label": "Page",
+          "type": "component",
+          "required": true,
           "isList": false,
           "isTitle": false,
-          "localized": true,
+          "localized": false,
           "config": {
-            "richText": {
-              "code": true,
-              "links": true,
-              "lists": true,
-              "media": true,
-              "quotes": true,
-              "headings": true
-            }
+            "isList": false,
+            "targetModelSlugs": [
+              "page"
+            ]
           },
-          "targetModelIds": []
-        },
-        {
-          "key": "slug",
-          "label": "Slug",
-          "type": "slug",
-          "required": false,
-          "isList": false,
-          "isTitle": false,
-          "localized": true,
-          "config": {
-            "unique": true
-          },
-          "targetModelIds": []
+          "targetModelIds": [
+            "c14051f7-8f0f-422d-9acf-f568b5c9f1e4"
+          ]
         }
       ]
     }
   ],
-  "schemaHash": "94d8ef8dbe222ee89eee187258da7f7b3dafe981b21bbc2126b673efa4255aab",
-  "generatedAt": "2026-10-29T21:02:53.943Z",
+  "schemaHash": "e770c7772dac9e580671f2b13d3de4fe5246a7bfcd09c97c89d03b462b0bdbbf",
   "origin": "https://cms.fourd.nl",
   "revalidation": {
     "configured": false,

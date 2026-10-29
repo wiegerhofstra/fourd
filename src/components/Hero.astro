@@ -8,7 +8,7 @@ const t = useTranslations(locale);
 const phrases = t("hero.phrases");
 
 // The logo is drawn as a wireframe first, with construction lines along its isometric edges,
-// and then the real logo is laid on top. The construction lines run past the logo, so they stay visible.
+// and then the real logo is laid on top. Once it has landed, the construction lines fade away.
 const step = { x: 0.866, y: 0.5 };
 const extend = (x1: number, y1: number, x2: number, y2: number, by: number) => {
   const length = Math.hypot(x2 - x1, y2 - y1);
@@ -45,16 +45,16 @@ const vertices = [[8.237, 0.01], [9.883, 0.96], [9.883, 12.46], [8.237, 13.41], 
 
     <svg class="figure" viewBox="-1.6 -1.2 13.1 15.8" aria-hidden="true">
       <g class="guides">
-        {guides.map((line) => <line {...line} pathLength="1" />)}
+        {guides.map((line, index) => <line {...line} pathLength="1" style={`--i: ${index}`} />)}
       </g>
       <g class="wireframe">
-        {logoFaces.map((face) => <polygon points={face.points} pathLength="1" />)}
+        {logoFaces.map((face, index) => <polygon points={face.points} pathLength="1" style={`--i: ${index}`} />)}
       </g>
       <g class="logo" stroke-linejoin="round" stroke-width="0.02">
         {logoFaces.map((face) => <polygon class={face.name} points={face.points} fill={face.fill} stroke={face.fill} />)}
       </g>
       <g class="vertices">
-        {vertices.map(([x, y]) => <circle cx={x} cy={y} r="0.11" />)}
+        {vertices.map(([x, y], index) => <circle cx={x} cy={y} r="0.11" style={`--i: ${index}`} />)}
       </g>
     </svg>
   </div>
@@ -210,27 +210,47 @@ const vertices = [[8.237, 0.01], [9.883, 0.96], [9.883, 12.46], [8.237, 13.41], 
     stroke-width: 0.03;
   }
 
-  /* One entrance: guides and wireframe are drawn, then the logo's faces are laid over them. */
+  /*
+   * One entrance, about five seconds, like a drawing being made:
+   * 0–1.9s construction lines are drafted one by one, 0.5–2.9s the wireframe is traced over them,
+   * 2.4s vertices are marked, 2.9–4.5s the logo's faces are laid on, 4.8–6s the construction fades.
+   */
   @media (prefers-reduced-motion: no-preference) {
     .guides line {
-      animation: draw 0.9s cubic-bezier(0.6, 0, 0.2, 1) both;
+      animation:
+        draw 1s cubic-bezier(0.6, 0, 0.2, 1) calc(var(--i) * 0.15s) both,
+        fade-out 1.2s ease-in-out 4.8s forwards;
     }
 
     .wireframe polygon {
-      animation: draw 1.3s cubic-bezier(0.6, 0, 0.2, 1) 0.2s both;
+      animation: draw 1.8s cubic-bezier(0.6, 0, 0.2, 1) calc(0.5s + var(--i) * 0.3s) both;
     }
 
     .vertices circle {
-      animation: appear 0.3s ease-out 1.2s both;
+      animation:
+        appear 0.35s ease-out calc(2.4s + var(--i) * 0.08s) both,
+        fade-out 1.2s ease-in-out 4.8s forwards;
     }
 
     .logo polygon {
-      animation: appear 0.7s ease-out both;
+      animation: appear 1s ease-out both;
     }
 
-    .logo .top { animation-delay: 1.4s; }
-    .logo .side { animation-delay: 1.6s; }
-    .logo .front { animation-delay: 1.8s; }
+    .logo .top { animation-delay: 2.9s; }
+    .logo .side { animation-delay: 3.2s; }
+    .logo .front { animation-delay: 3.5s; }
+  }
+
+  /* Without motion, show the finished drawing: the logo without its construction. */
+  @media (prefers-reduced-motion: reduce) {
+    .guides,
+    .vertices {
+      display: none;
+    }
+  }
+
+  @keyframes fade-out {
+    to { opacity: 0; }
   }
 
   @keyframes draw {

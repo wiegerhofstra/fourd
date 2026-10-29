@@ -1,0 +1,22 @@
+---
+import { logoFaces, logoViewBox } from "../lib/logo";
+
+interface Props { class?: string; title?: string }
+// `rest` carries the parent's scoped-style attribute so its styles reach this element.
+const { class: className, title, ...rest } = Astro.props;
+---
+<svg class={className} {...rest} viewBox={`0 0 ${logoViewBox.width} ${logoViewBox.height}`} role={title ? "img" : undefined} aria-hidden={title ? undefined : "true"} aria-label={title}>
+  <g stroke-linejoin="round" stroke-width="0.02">
+    {logoFaces.map((face) => <polygon points={face.points} fill={face.fill} stroke={face.fill} />)}
+  </g>
+  <!-- Thin edges keep the light face visible on light backgrounds; set --logo-edge to enable them. -->
+  <g class="edges" fill="none" stroke-linejoin="round" style="stroke: var(--logo-edge, none)">
+    {logoFaces.map((face) => <polygon points={face.points} vector-effect="non-scaling-stroke" />)}
+  </g>
+</svg>
+
+<style>
+  .edges {
+    stroke-width: var(--logo-edge-width, 1px);
+  }
+</style>

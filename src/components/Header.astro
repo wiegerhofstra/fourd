@@ -1,0 +1,200 @@
+---
+import LogoMark from "./LogoMark.astro";
+import { getMenu, type MenuItem } from "../lib/cms";
+import { locales, path, useTranslations, type Locale, type RouteKey } from "../lib/i18n";
+
+interface Props { locale: Locale; section?: RouteKey; alternates: Partial<Record<Locale, string>> }
+const { locale, section, alternates } = Astro.props;
+const t = useTranslations(locale);
+
+// Pages an editor adds to a CMS menu appear after the fixed sections. The site still works without them.
+let cmsItems: MenuItem[] = [];
+try {
+  cmsItems = await getMenu(locale);
+} catch (error) {
+  console.error("[cms] Menu unavailable", error);
+}
+
+const items = [
+  { href: path("services", locale), label: t("nav.services"), current: section === "services" || section === "service" },
+  { href: path("work", locale), label: t("nav.work"), current: section === "work" },
+  ...cmsItems.map((item) => ({ href: path("page", locale, item.slug), label: item.title, current: Astro.url.pathname === path("page", locale, item.slug) })),
+  { href: path("contact", locale), label: t("nav.contact"), current: section === "contact" },
+];
+const languageNames: Record<Locale, string> = { nl: "Nederlands", en: "English" };
+---
+<header class="site-header">
+  <div class="wrap bar">
+    <a class="brand" href={path("home", locale)} aria-label={`FourD Software, ${t("nav.home")}`}>
+      <LogoMark class="mark" />
+      <span class="wordmark"><b>FourD</b> Software</span>
+    </a>
+
+    <details class="menu" open>
+      <summary>{t("nav.menu")}</summary>
+      <nav aria-label={t("nav.label")}>
+        <ul class="links">
+          {items.map((item) => (
+            <li><a href={item.href} aria-current={item.current ? "page" : undefined}>{item.label}</a></li>
+          ))}
+        </ul>
+        <ul class="languages" aria-label={t("nav.language")}>
+          {locales.map((code) => (
+            <li>
+              <a href={alternates[code] ?? path("home", code)} hreflang={code} lang={code} aria-current={code === locale ? "true" : undefined} title={languageNames[code]}>
+                {code.toUpperCase()}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </nav>
+    </details>
+    <script is:inline>
+      // The menu is open in the markup so it works without JavaScript; collapse it on small screens.
+      (() => {
+        const menu = document.currentScript.previousElementSibling;
+        const wide = matchMedia("(min-width: 48rem)");
+        const sync = () => { menu.open = wide.matches; };
+        sync();
+        wide.addEventListener("change", sync);
+      })();
+    </script>
+  </div>
+</header>
+
+<style>
+  .site-header {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    background: color-mix(in srgb, var(--paper) 88%, transparent);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.5rem;
+    min-height: 4.5rem;
+  }
+
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+    text-decoration: none;
+  }
+
+  .mark {
+    --logo-edge: #8c8c8c;
+    width: 1.55rem;
+    height: auto;
+    overflow: visible;
+  }
+
+  .wordmark {
+    color: var(--slate);
+    font-size: var(--step-0);
+    letter-spacing: -0.01em;
+  }
+
+  .wordmark b {
+    color: var(--ink);
+    font-variation-settings: var(--display);
+    font-weight: 800;
+  }
+
+  nav {
+    display: flex;
+    align-items: center;
+    gap: 2.5rem;
+  }
+
+  ul {
+    display: flex;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .links {
+    gap: 2rem;
+  }
+
+  .links a {
+    display: block;
+    padding-block: 0.4rem;
+    font-weight: 550;
+    text-decoration: none;
+    background: linear-gradient(var(--rose), var(--rose)) no-repeat left bottom / 0 2px;
+    transition: background-size 180ms ease;
+  }
+
+  .links a:hover,
+  .links a[aria-current="page"] {
+    background-size: 100% 2px;
+  }
+
+  .languages {
+    gap: 0.25rem;
+    font-size: var(--step--1);
+  }
+
+  .languages a {
+    display: block;
+    padding: 0.25rem 0.5rem;
+    color: var(--slate);
+    font-weight: 600;
+    text-decoration: none;
+  }
+
+  .languages a[aria-current="true"] {
+    background: var(--ink);
+    color: var(--paper);
+  }
+
+  summary {
+    display: none;
+  }
+
+  @media (max-width: 47.99rem) {
+    summary {
+      display: block;
+      padding: 0.5rem 0.9rem;
+      border: 1px solid var(--ink);
+      font-weight: 600;
+      cursor: pointer;
+      list-style: none;
+    }
+
+    summary::-webkit-details-marker {
+      display: none;
+    }
+
+    .menu[open] summary {
+      background: var(--ink);
+      color: var(--paper);
+    }
+
+    nav {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      flex-direction: column;
+      align-items: stretch;
+      gap: 1.5rem;
+      padding: 1.5rem var(--gutter) 2rem;
+      background: var(--paper);
+      border-bottom: 1px solid var(--rule);
+    }
+
+    .links {
+      flex-direction: column;
+      gap: 0.25rem;
+      font-size: var(--step-2);
+    }
+  }
+</style>

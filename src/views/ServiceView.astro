@@ -1,0 +1,167 @@
+---
+import Base from "../layouts/Base.astro";
+import ContactBand from "../components/ContactBand.astro";
+import ServiceIcon from "../components/ServiceIcon.astro";
+import type { Image, Service } from "../lib/cms";
+import { path, useTranslations, type Locale } from "../lib/i18n";
+
+interface Props {
+  locale: Locale;
+  service: Service;
+  /** Cover image of the CMS page with the same slug, if any; the service model has no image field. */
+  cover: Image | null;
+  others: Service[];
+  alternates: Partial<Record<Locale, string>>;
+}
+const { locale, service, cover, others, alternates } = Astro.props;
+const t = useTranslations(locale);
+---
+<Base locale={locale} section="service" title={service.title} description={service.short ?? undefined} alternates={alternates} image={cover?.src}>
+  <article>
+    <header class="wrap head">
+      <a class="crumb" href={path("services", locale)}>{t("nav.services")}</a>
+      <div class="title">
+        <ServiceIcon slug={service.slug} class="icon" />
+        <h1>{service.title}</h1>
+      </div>
+      {service.intro ? <div class="lead" set:html={service.intro} /> : service.short && <p class="lead">{service.short}</p>}
+    </header>
+
+    <div class:list={["wrap body", { "has-cover": cover }]}>
+      {service.content && <div class="prose" set:html={service.content} />}
+      {cover && (
+        <figure class="cover">
+          <img src={cover.src} width={cover.width} height={cover.height} alt="" />
+        </figure>
+      )}
+    </div>
+  </article>
+
+  {others.length > 0 && (
+    <nav class="wrap others" aria-labelledby="others-title">
+      <h2 id="others-title">{t("service.other")}</h2>
+      <ul>
+        {others.map((other) => (
+          <li>
+            <a href={path("service", locale, other.slug)}>
+              <ServiceIcon slug={other.slug} class="small-icon" />
+              {other.title}
+            </a>
+          </li>
+        ))}
+      </ul>
+    </nav>
+  )}
+
+  <ContactBand locale={locale} heading={t("service.cta")} body={t("service.ctaBody")} />
+</Base>
+
+<style>
+  .head {
+    padding-block: clamp(2.5rem, 7vw, 5rem) clamp(2rem, 5vw, 3.5rem);
+  }
+
+  .crumb {
+    color: var(--slate);
+    font-weight: 600;
+    text-decoration-color: var(--rose);
+  }
+
+  .title {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+    margin-top: 1.5rem;
+  }
+
+  .icon {
+    flex: none;
+    width: clamp(2.5rem, 6vw, 4rem);
+    height: auto;
+    color: var(--rose-deep);
+  }
+
+  h1 {
+    font-size: var(--step-5);
+  }
+
+  .lead {
+    max-width: 40rem;
+    margin-top: 1.75rem;
+    color: var(--slate);
+    font-size: var(--step-1);
+    line-height: 1.5;
+  }
+
+  .body {
+    display: grid;
+    gap: clamp(2rem, 5vw, 5rem);
+    padding-bottom: clamp(3.5rem, 8vw, 6rem);
+  }
+
+  .body.has-cover {
+    grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+    align-items: start;
+  }
+
+  .cover {
+    --side: var(--face-mid);
+    margin: 0 12px 0 0;
+    box-shadow:
+      2px 1px 0 var(--side), 4px 2px 0 var(--side), 6px 3px 0 var(--side),
+      8px 4px 0 var(--side), 10px 5px 0 var(--side), 12px 6px 0 var(--side);
+  }
+
+  .cover img {
+    width: 100%;
+  }
+
+  .others {
+    padding-block: 2.5rem clamp(4rem, 8vw, 6rem);
+    border-top: 1px solid var(--rule);
+  }
+
+  .others h2 {
+    font-size: var(--step-1);
+  }
+
+  .others ul {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem 2.5rem;
+    margin: 1.25rem 0 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .others a {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    font-size: var(--step-2);
+    font-variation-settings: var(--display);
+    font-weight: 750;
+    text-decoration: none;
+  }
+
+  .others a:hover {
+    text-decoration: underline;
+    text-decoration-color: var(--rose);
+    text-decoration-thickness: 3px;
+  }
+
+  .small-icon {
+    width: 1.4rem;
+    color: var(--rose-deep);
+  }
+
+  @media (max-width: 52rem) {
+    .body.has-cover {
+      grid-template-columns: 1fr;
+    }
+
+    .cover {
+      grid-row: 1;
+    }
+  }
+</style>

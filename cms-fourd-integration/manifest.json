@@ -1,0 +1,212 @@
+{
+  "formatVersion": "1.0.0",
+  "tenant": {
+    "name": "FourD",
+    "slug": "fourd",
+    "defaultLocale": "nl",
+    "locales": [
+      "en",
+      "nl"
+    ]
+  },
+  "models": [
+    {
+      "id": "4b7dbfbb-eaab-44d7-bd4a-8ef1b97d6c0f",
+      "name": "Menu",
+      "slug": "menu",
+      "pageUrl": null,
+      "status": "active",
+      "fields": [
+        {
+          "key": "internal_name",
+          "label": "Internal name",
+          "type": "text",
+          "required": true,
+          "isList": false,
+          "isTitle": true,
+          "localized": false,
+          "config": {},
+          "targetModelIds": []
+        },
+        {
+          "key": "items",
+          "label": "Items",
+          "type": "component",
+          "required": false,
+          "isList": true,
+          "isTitle": false,
+          "localized": false,
+          "config": {
+            "isList": true,
+            "targetModelSlugs": [
+              "page"
+            ]
+          },
+          "targetModelIds": [
+            "c14051f7-8f0f-422d-9acf-f568b5c9f1e4"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "c14051f7-8f0f-422d-9acf-f568b5c9f1e4",
+      "name": "Page",
+      "slug": "page",
+      "pageUrl": null,
+      "status": "active",
+      "fields": [
+        {
+          "key": "slug",
+          "label": "slug",
+          "type": "slug",
+          "required": true,
+          "isList": false,
+          "isTitle": false,
+          "localized": false,
+          "config": {
+            "unique": true
+          },
+          "targetModelIds": []
+        },
+        {
+          "key": "title",
+          "label": "Title",
+          "type": "text",
+          "required": true,
+          "isList": false,
+          "isTitle": true,
+          "localized": true,
+          "config": {},
+          "targetModelIds": []
+        },
+        {
+          "key": "cover_image",
+          "label": "Cover Image",
+          "type": "asset",
+          "required": false,
+          "isList": false,
+          "isTitle": false,
+          "localized": false,
+          "config": {
+            "allowedTypes": [
+              "image"
+            ]
+          },
+          "targetModelIds": []
+        },
+        {
+          "key": "content",
+          "label": "Content",
+          "type": "rich_text",
+          "required": false,
+          "isList": false,
+          "isTitle": false,
+          "localized": true,
+          "config": {
+            "richText": {
+              "code": true,
+              "links": true,
+              "lists": true,
+              "media": true,
+              "quotes": true,
+              "headings": true
+            }
+          },
+          "targetModelIds": []
+        }
+      ]
+    },
+    {
+      "id": "ca392046-8f89-471e-979f-fb1dff75642b",
+      "name": "Service",
+      "slug": "service",
+      "pageUrl": null,
+      "status": "active",
+      "fields": [
+        {
+          "key": "title",
+          "label": "Title",
+          "type": "text",
+          "required": true,
+          "isList": false,
+          "isTitle": true,
+          "localized": true,
+          "config": {},
+          "targetModelIds": []
+        },
+        {
+          "key": "short",
+          "label": "Short",
+          "type": "text",
+          "required": false,
+          "isList": false,
+          "isTitle": false,
+          "localized": true,
+          "config": {},
+          "targetModelIds": []
+        },
+        {
+          "key": "intro",
+          "label": "intro",
+          "type": "rich_text",
+          "required": false,
+          "isList": false,
+          "isTitle": false,
+          "localized": true,
+          "config": {
+            "richText": {
+              "code": true,
+              "links": true,
+              "lists": true,
+              "media": true,
+              "quotes": true,
+              "headings": true
+            }
+          },
+          "targetModelIds": []
+        },
+        {
+          "key": "content",
+          "label": "Content",
+          "type": "rich_text",
+          "required": false,
+          "isList": false,
+          "isTitle": false,
+          "localized": true,
+          "config": {
+            "richText": {
+              "code": true,
+              "links": true,
+              "lists": true,
+              "media": true,
+              "quotes": true,
+              "headings": true
+            }
+          },
+          "targetModelIds": []
+        },
+        {
+          "key": "slug",
+          "label": "Slug",
+          "type": "slug",
+          "required": false,
+          "isList": false,
+          "isTitle": false,
+          "localized": true,
+          "config": {
+            "unique": true
+          },
+          "targetModelIds": []
+        }
+      ]
+    }
+  ],
+  "schemaHash": "94d8ef8dbe222ee89eee187258da7f7b3dafe981b21bbc2126b673efa4255aab",
+  "generatedAt": "2026-10-29T21:02:53.943Z",
+  "origin": "https://cms.fourd.nl",
+  "revalidation": {
+    "configured": false,
+    "url": null
+  },
+  "examplesAreSynthetic": true
+}

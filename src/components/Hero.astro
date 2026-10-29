@@ -1,0 +1,255 @@
+---
+import { path, useTranslations, type Locale } from "../lib/i18n";
+import { logoFaces } from "../lib/logo";
+
+interface Props { locale: Locale }
+const { locale } = Astro.props;
+const t = useTranslations(locale);
+const phrases = t("hero.phrases");
+
+// The logo is drawn as a wireframe first, with construction lines along its isometric edges,
+// and then the real logo is laid on top. The construction lines run past the logo, so they stay visible.
+const step = { x: 0.866, y: 0.5 };
+const extend = (x1: number, y1: number, x2: number, y2: number, by: number) => {
+  const length = Math.hypot(x2 - x1, y2 - y1);
+  const [dx, dy] = [((x2 - x1) / length) * by, ((y2 - y1) / length) * by];
+  return { x1: x1 - dx, y1: y1 - dy, x2: x2 + dx, y2: y2 + dy };
+};
+const guides = [
+  extend(0.01, 4.76, 8.237, 0.01, 1.4),
+  extend(0.01, 6.66, 6.592, 10.46, 1.4),
+  extend(8.237, 13.41, 9.883, 12.46, 1.4),
+  extend(9.883, 0.96, 9.883, 12.46, 1.1),
+  extend(8.237, 0.01, 8.237, 13.41, 0.9),
+  extend(0.01, 4.76, 0.01, 6.66, 1.1),
+  extend(8.237, 0.01, 8.237 + step.x, 0.01 + step.y, 1.4),
+];
+const vertices = [[8.237, 0.01], [9.883, 0.96], [9.883, 12.46], [8.237, 13.41], [0.01, 4.76], [0.01, 6.66]];
+---
+<section class="hero">
+  <div class="wrap layout">
+    <div class="copy">
+      <h1>
+        <span class="lead">{t("hero.lead")}</span>
+        <span class="phrases" aria-hidden="true" data-rotate={JSON.stringify(phrases)}>
+          {phrases.map((phrase, index) => <span class:list={["phrase", { active: index === 0 }]}>{phrase}</span>)}
+        </span>
+        <span class="visually-hidden">{phrases[0]}</span>
+      </h1>
+      <p class="body">{t("hero.body")}</p>
+      <div class="actions">
+        <a class="button" href={path("contact", locale)}>{t("hero.primary")}</a>
+        <a class="button is-quiet" href={path("services", locale)}>{t("hero.secondary")}</a>
+      </div>
+    </div>
+
+    <svg class="figure" viewBox="-1.6 -1.2 13.1 15.8" aria-hidden="true">
+      <g class="guides">
+        {guides.map((line) => <line {...line} pathLength="1" />)}
+      </g>
+      <g class="wireframe">
+        {logoFaces.map((face) => <polygon points={face.points} pathLength="1" />)}
+      </g>
+      <g class="logo" stroke-linejoin="round" stroke-width="0.02">
+        {logoFaces.map((face) => <polygon class={face.name} points={face.points} fill={face.fill} stroke={face.fill} />)}
+      </g>
+      <g class="vertices">
+        {vertices.map(([x, y]) => <circle cx={x} cy={y} r="0.11" />)}
+      </g>
+    </svg>
+  </div>
+</section>
+
+<script>
+  // Types the hero phrases in turn, like the previous site. Skipped when reduced motion is preferred.
+  const container = document.querySelector<HTMLElement>(".hero [data-rotate]");
+  const phrases = container ? [...container.querySelectorAll<HTMLElement>(".phrase")] : [];
+  const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  if (container && phrases.length > 1 && !reduced) {
+    const texts = phrases.map((phrase) => phrase.textContent ?? "");
+    const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+    let index = 0;
+
+    const run = async () => {
+      await wait(2600);
+      for (;;) {
+        const current = phrases[index]!;
+        for (let length = texts[index]!.length; length >= 0; length--) {
+          current.textContent = texts[index]!.slice(0, length);
+          await wait(28);
+        }
+        current.classList.remove("active");
+        current.textContent = texts[index]!;
+        index = (index + 1) % phrases.length;
+        const next = phrases[index]!;
+        next.textContent = "";
+        next.classList.add("active");
+        for (let length = 1; length <= texts[index]!.length; length++) {
+          next.textContent = texts[index]!.slice(0, length);
+          await wait(55);
+        }
+        await wait(2400);
+      }
+    };
+    run();
+  }
+</script>
+
+<style>
+  .hero {
+    position: relative;
+    overflow: hidden;
+    padding-block: clamp(3rem, 8vw, 7rem) clamp(4rem, 9vw, 8rem);
+    border-bottom: 1px solid var(--rule);
+  }
+
+  /* An isometric drafting grid, fading out towards the copy. */
+  .hero::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='55.426' height='32' viewBox='0 0 55.426 32'%3E%3Cpath d='M0 0L55.426 32M0 32L55.426 0M0 0V32M27.713 0V32' stroke='%23c9d0dc' stroke-width='1' fill='none'/%3E%3C/svg%3E");
+    background-size: 55.426px 32px;
+    mask-image: radial-gradient(ellipse 60% 85% at 78% 50%, #000 15%, transparent 75%);
+    pointer-events: none;
+  }
+
+  .layout {
+    position: relative;
+    display: grid;
+    grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+    align-items: center;
+    gap: clamp(2rem, 5vw, 5rem);
+  }
+
+  h1 {
+    font-size: clamp(2.5rem, 1.1rem + 4.6vw, 4.75rem);
+    line-height: 1;
+  }
+
+  .lead {
+    display: block;
+    color: var(--slate);
+    font-weight: 500;
+  }
+
+  /* Every phrase occupies the same cell, so the heading keeps the height of the longest one. */
+  .phrases {
+    display: grid;
+    margin-top: 0.08em;
+  }
+
+  .phrase {
+    grid-area: 1 / 1;
+    visibility: hidden;
+  }
+
+  .phrase.active {
+    visibility: visible;
+  }
+
+  .phrase.active::after {
+    content: "";
+    display: inline-block;
+    width: 0.09em;
+    height: 0.82em;
+    margin-left: 0.06em;
+    vertical-align: -0.04em;
+    background: var(--rose);
+    animation: caret 1.1s steps(1) infinite;
+  }
+
+  @keyframes caret {
+    50% { opacity: 0; }
+  }
+
+  .body {
+    max-width: 33rem;
+    margin-top: 2rem;
+    color: var(--slate);
+    font-size: var(--step-1);
+    line-height: 1.5;
+  }
+
+  .actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.25rem 1.5rem;
+    margin-top: 2.5rem;
+  }
+
+  .figure {
+    width: 100%;
+    max-width: 30rem;
+    justify-self: center;
+    overflow: visible;
+  }
+
+  .guides line,
+  .wireframe polygon {
+    fill: none;
+    stroke-dasharray: 1;
+    stroke-dashoffset: 0;
+  }
+
+  .guides line {
+    stroke: var(--rose);
+    stroke-width: 0.025;
+  }
+
+  .wireframe polygon {
+    stroke: var(--slate);
+    stroke-width: 0.04;
+    stroke-linejoin: round;
+  }
+
+  .vertices circle {
+    fill: var(--paper);
+    stroke: var(--rose);
+    stroke-width: 0.03;
+  }
+
+  /* One entrance: guides and wireframe are drawn, then the logo's faces are laid over them. */
+  @media (prefers-reduced-motion: no-preference) {
+    .guides line {
+      animation: draw 0.9s cubic-bezier(0.6, 0, 0.2, 1) both;
+    }
+
+    .wireframe polygon {
+      animation: draw 1.3s cubic-bezier(0.6, 0, 0.2, 1) 0.2s both;
+    }
+
+    .vertices circle {
+      animation: appear 0.3s ease-out 1.2s both;
+    }
+
+    .logo polygon {
+      animation: appear 0.7s ease-out both;
+    }
+
+    .logo .top { animation-delay: 1.4s; }
+    .logo .side { animation-delay: 1.6s; }
+    .logo .front { animation-delay: 1.8s; }
+  }
+
+  @keyframes draw {
+    from { stroke-dashoffset: 1; }
+  }
+
+  @keyframes appear {
+    from { opacity: 0; }
+  }
+
+  @media (max-width: 52rem) {
+    .layout {
+      grid-template-columns: 1fr;
+    }
+
+    .figure {
+      grid-row: 1;
+      max-width: 13rem;
+      justify-self: start;
+    }
+  }
+</style>

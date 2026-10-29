@@ -1,0 +1,46 @@
+---
+interface Props { title: string; lead?: string }
+const { title, lead } = Astro.props;
+---
+<header class="intro">
+  <div class="wrap">
+    <h1>{title}</h1>
+    {lead && <p>{lead}</p>}
+    <slot />
+  </div>
+</header>
+
+<style>
+  .intro {
+    position: relative;
+    padding-block: clamp(3rem, 8vw, 6rem) clamp(2.5rem, 6vw, 4.5rem);
+  }
+
+  /* A strip of isometric grid along the right edge ties inner pages to the home hero. */
+  .intro::before {
+    content: "";
+    position: absolute;
+    inset: 0 0 0 45%;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='55.426' height='32' viewBox='0 0 55.426 32'%3E%3Cpath d='M0 0L55.426 32M0 32L55.426 0M0 0V32M27.713 0V32' stroke='%23c9d0dc' stroke-width='1' fill='none'/%3E%3C/svg%3E");
+    background-size: 55.426px 32px;
+    mask-image: linear-gradient(to right, transparent, #000 70%);
+    pointer-events: none;
+  }
+
+  .wrap {
+    position: relative;
+  }
+
+  h1 {
+    max-width: 18ch;
+    font-size: var(--step-5);
+  }
+
+  p {
+    max-width: var(--measure);
+    margin-top: 1.75rem;
+    color: var(--slate);
+    font-size: var(--step-1);
+    line-height: 1.5;
+  }
+</style>

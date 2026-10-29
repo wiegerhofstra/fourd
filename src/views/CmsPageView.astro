@@ -1,0 +1,42 @@
+---
+import Base from "../layouts/Base.astro";
+import PageIntro from "../components/PageIntro.astro";
+import ContactBand from "../components/ContactBand.astro";
+import type { Page } from "../lib/cms";
+import type { Locale } from "../lib/i18n";
+
+interface Props { locale: Locale; page: Page; alternates: Partial<Record<Locale, string>> }
+const { locale, page, alternates } = Astro.props;
+---
+<Base locale={locale} title={page.title} alternates={alternates} image={page.cover?.src}>
+  <PageIntro title={page.title} />
+  <div class:list={["wrap body", { "has-cover": page.cover }]}>
+    {page.content && <div class="prose" set:html={page.content} />}
+    {page.cover && <img class="cover" src={page.cover.src} width={page.cover.width} height={page.cover.height} alt="" />}
+  </div>
+  <ContactBand locale={locale} />
+</Base>
+
+<style>
+  .body {
+    display: grid;
+    gap: clamp(2rem, 5vw, 5rem);
+    padding-bottom: clamp(4rem, 9vw, 7rem);
+  }
+
+  .body.has-cover {
+    grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+    align-items: start;
+  }
+
+  .cover {
+    width: 100%;
+    border: 1px solid var(--rule);
+  }
+
+  @media (max-width: 52rem) {
+    .body.has-cover {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

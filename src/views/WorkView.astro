@@ -1,0 +1,24 @@
+---
+import Base from "../layouts/Base.astro";
+import PageIntro from "../components/PageIntro.astro";
+import WorkList from "../components/WorkList.astro";
+import ContactBand from "../components/ContactBand.astro";
+import { path, useTranslations, type Locale } from "../lib/i18n";
+
+interface Props { locale: Locale }
+const { locale } = Astro.props;
+const t = useTranslations(locale);
+---
+<Base locale={locale} section="work" title={t("work.title")} description={t("work.intro")} alternates={{ nl: path("work", "nl"), en: path("work", "en") }}>
+  <PageIntro title={t("work.title")} lead={t("work.intro")} />
+  <div class="wrap list">
+    <WorkList locale={locale} />
+  </div>
+  <ContactBand locale={locale} />
+</Base>
+
+<style>
+  .list {
+    padding-block: 1rem clamp(4rem, 9vw, 7rem);
+  }
+</style>

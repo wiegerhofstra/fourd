@@ -1,0 +1,564 @@
+{
+  "note": "Synthetic fixtures only. Each byModel item is a separate endpoint response, not a cross-model collection.",
+  "byModel": {
+    "menu": {
+      "compact": {
+        "data": [
+          {
+            "id": "e6b243e1-d3dc-415a-8828-932a870807df",
+            "modelId": "4b7dbfbb-eaab-44d7-bd4a-8ef1b97d6c0f",
+            "url": null,
+            "status": "published",
+            "data": {
+              "internal_name": "Example text",
+              "items": [
+                {
+                  "id": "dde3a104-8b55-47d8-8a25-aaba9af51789",
+                  "modelId": "c14051f7-8f0f-422d-9acf-f568b5c9f1e4"
+                }
+              ]
+            },
+            "publishedAt": "2026-01-01T12:00:00.000Z",
+            "createdAt": "2026-01-01T11:00:00.000Z",
+            "updatedAt": "2026-01-01T12:00:00.000Z"
+          }
+        ],
+        "meta": {
+          "nextCursor": null,
+          "maxDepth": 1,
+          "locale": "nl"
+        }
+      },
+      "expanded": {
+        "data": {
+          "id": "e6b243e1-d3dc-415a-8828-932a870807df",
+          "modelId": "4b7dbfbb-eaab-44d7-bd4a-8ef1b97d6c0f",
+          "url": null,
+          "status": "published",
+          "data": {
+            "internal_name": "Example text",
+            "items": [
+              {
+                "id": "dde3a104-8b55-47d8-8a25-aaba9af51789",
+                "modelId": "c14051f7-8f0f-422d-9acf-f568b5c9f1e4",
+                "url": null,
+                "status": "published",
+                "data": {
+                  "slug": "example-page",
+                  "title": "Example text",
+                  "cover_image": {
+                    "id": "d59386e0-ae43-4e29-8fbe-0ebcdb954b75",
+                    "originalName": "example.jpg",
+                    "mimeType": "image/jpeg",
+                    "sizeBytes": 1024,
+                    "imageWidth": 800,
+                    "imageHeight": 600,
+                    "url": "https://example.invalid/synthetic-image.jpg",
+                    "downloadUrl": "https://example.invalid/media/synthetic-image"
+                  },
+                  "content": {
+                    "type": "doc",
+                    "content": [
+                      {
+                        "type": "paragraph",
+                        "content": [
+                          {
+                            "type": "text",
+                            "text": "Synthetic example text",
+                            "marks": [
+                              {
+                                "type": "bold"
+                              }
+                            ]
+                          }
+                        ]
+                      },
+                      {
+                        "type": "asset",
+                        "attrs": {
+                          "assetId": "d59386e0-ae43-4e29-8fbe-0ebcdb954b75",
+                          "asset": {
+                            "id": "d59386e0-ae43-4e29-8fbe-0ebcdb954b75",
+                            "originalName": "example.jpg",
+                            "mimeType": "image/jpeg",
+                            "sizeBytes": 1024,
+                            "imageWidth": 800,
+                            "imageHeight": 600,
+                            "url": "https://example.invalid/synthetic-image.jpg",
+                            "downloadUrl": "https://example.invalid/media/synthetic-image"
+                          }
+                        }
+                      }
+                    ]
+                  }
+                },
+                "publishedAt": "2026-01-01T12:00:00.000Z",
+                "createdAt": "2026-01-01T11:00:00.000Z",
+                "updatedAt": "2026-01-01T12:00:00.000Z"
+              }
+            ]
+          },
+          "publishedAt": "2026-01-01T12:00:00.000Z",
+          "createdAt": "2026-01-01T11:00:00.000Z",
+          "updatedAt": "2026-01-01T12:00:00.000Z"
+        },
+        "meta": {
+          "maxDepth": 2,
+          "locale": "nl"
+        }
+      },
+      "missingFields": {
+        "data": {
+          "id": "e6b243e1-d3dc-415a-8828-932a870807df",
+          "modelId": "4b7dbfbb-eaab-44d7-bd4a-8ef1b97d6c0f",
+          "url": null,
+          "status": "published",
+          "data": {},
+          "publishedAt": "2026-01-01T12:00:00.000Z",
+          "createdAt": "2026-01-01T11:00:00.000Z",
+          "updatedAt": "2026-01-01T12:00:00.000Z"
+        },
+        "meta": {
+          "maxDepth": 1,
+          "locale": "nl"
+        }
+      },
+      "unavailableRelations": {
+        "data": {
+          "id": "e6b243e1-d3dc-415a-8828-932a870807df",
+          "modelId": "4b7dbfbb-eaab-44d7-bd4a-8ef1b97d6c0f",
+          "url": null,
+          "status": "published",
+          "data": {
+            "items": []
+          },
+          "publishedAt": "2026-01-01T12:00:00.000Z",
+          "createdAt": "2026-01-01T11:00:00.000Z",
+          "updatedAt": "2026-01-01T12:00:00.000Z"
+        },
+        "meta": {
+          "maxDepth": 1,
+          "locale": "nl"
+        }
+      }
+    },
+    "page": {
+      "compact": {
+        "data": [
+          {
+            "id": "dde3a104-8b55-47d8-8a25-aaba9af51789",
+            "modelId": "c14051f7-8f0f-422d-9acf-f568b5c9f1e4",
+            "url": null,
+            "status": "published",
+            "data": {
+              "slug": "example-page",
+              "title": "Example text",
+              "cover_image": {
+                "id": "d59386e0-ae43-4e29-8fbe-0ebcdb954b75",
+                "originalName": "example.jpg",
+                "mimeType": "image/jpeg",
+                "sizeBytes": 1024,
+                "imageWidth": 800,
+                "imageHeight": 600,
+                "url": "https://example.invalid/synthetic-image.jpg",
+                "downloadUrl": "https://example.invalid/media/synthetic-image"
+              },
+              "content": {
+                "type": "doc",
+                "content": [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Synthetic example text",
+                        "marks": [
+                          {
+                            "type": "bold"
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "type": "asset",
+                    "attrs": {
+                      "assetId": "d59386e0-ae43-4e29-8fbe-0ebcdb954b75",
+                      "asset": {
+                        "id": "d59386e0-ae43-4e29-8fbe-0ebcdb954b75",
+                        "originalName": "example.jpg",
+                        "mimeType": "image/jpeg",
+                        "sizeBytes": 1024,
+                        "imageWidth": 800,
+                        "imageHeight": 600,
+                        "url": "https://example.invalid/synthetic-image.jpg",
+                        "downloadUrl": "https://example.invalid/media/synthetic-image"
+                      }
+                    }
+                  }
+                ]
+              }
+            },
+            "publishedAt": "2026-01-01T12:00:00.000Z",
+            "createdAt": "2026-01-01T11:00:00.000Z",
+            "updatedAt": "2026-01-01T12:00:00.000Z"
+          }
+        ],
+        "meta": {
+          "nextCursor": null,
+          "maxDepth": 1,
+          "locale": "nl"
+        }
+      },
+      "expanded": {
+        "data": {
+          "id": "dde3a104-8b55-47d8-8a25-aaba9af51789",
+          "modelId": "c14051f7-8f0f-422d-9acf-f568b5c9f1e4",
+          "url": null,
+          "status": "published",
+          "data": {
+            "slug": "example-page",
+            "title": "Example text",
+            "cover_image": {
+              "id": "d59386e0-ae43-4e29-8fbe-0ebcdb954b75",
+              "originalName": "example.jpg",
+              "mimeType": "image/jpeg",
+              "sizeBytes": 1024,
+              "imageWidth": 800,
+              "imageHeight": 600,
+              "url": "https://example.invalid/synthetic-image.jpg",
+              "downloadUrl": "https://example.invalid/media/synthetic-image"
+            },
+            "content": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Synthetic example text",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "asset",
+                  "attrs": {
+                    "assetId": "d59386e0-ae43-4e29-8fbe-0ebcdb954b75",
+                    "asset": {
+                      "id": "d59386e0-ae43-4e29-8fbe-0ebcdb954b75",
+                      "originalName": "example.jpg",
+                      "mimeType": "image/jpeg",
+                      "sizeBytes": 1024,
+                      "imageWidth": 800,
+                      "imageHeight": 600,
+                      "url": "https://example.invalid/synthetic-image.jpg",
+                      "downloadUrl": "https://example.invalid/media/synthetic-image"
+                    }
+                  }
+                }
+              ]
+            }
+          },
+          "publishedAt": "2026-01-01T12:00:00.000Z",
+          "createdAt": "2026-01-01T11:00:00.000Z",
+          "updatedAt": "2026-01-01T12:00:00.000Z"
+        },
+        "meta": {
+          "maxDepth": 2,
+          "locale": "nl"
+        }
+      },
+      "missingFields": {
+        "data": {
+          "id": "dde3a104-8b55-47d8-8a25-aaba9af51789",
+          "modelId": "c14051f7-8f0f-422d-9acf-f568b5c9f1e4",
+          "url": null,
+          "status": "published",
+          "data": {},
+          "publishedAt": "2026-01-01T12:00:00.000Z",
+          "createdAt": "2026-01-01T11:00:00.000Z",
+          "updatedAt": "2026-01-01T12:00:00.000Z"
+        },
+        "meta": {
+          "maxDepth": 1,
+          "locale": "nl"
+        }
+      },
+      "unavailableRelations": {
+        "data": {
+          "id": "dde3a104-8b55-47d8-8a25-aaba9af51789",
+          "modelId": "c14051f7-8f0f-422d-9acf-f568b5c9f1e4",
+          "url": null,
+          "status": "published",
+          "data": {
+            "cover_image": null
+          },
+          "publishedAt": "2026-01-01T12:00:00.000Z",
+          "createdAt": "2026-01-01T11:00:00.000Z",
+          "updatedAt": "2026-01-01T12:00:00.000Z"
+        },
+        "meta": {
+          "maxDepth": 1,
+          "locale": "nl"
+        }
+      }
+    },
+    "service": {
+      "compact": {
+        "data": [
+          {
+            "id": "af85c549-0c27-461d-8d40-5efbf34f5429",
+            "modelId": "ca392046-8f89-471e-979f-fb1dff75642b",
+            "url": null,
+            "status": "published",
+            "data": {
+              "title": "Example text",
+              "short": "Example text",
+              "intro": {
+                "type": "doc",
+                "content": [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Synthetic example text",
+                        "marks": [
+                          {
+                            "type": "bold"
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "type": "asset",
+                    "attrs": {
+                      "assetId": "d59386e0-ae43-4e29-8fbe-0ebcdb954b75",
+                      "asset": {
+                        "id": "d59386e0-ae43-4e29-8fbe-0ebcdb954b75",
+                        "originalName": "example.jpg",
+                        "mimeType": "image/jpeg",
+                        "sizeBytes": 1024,
+                        "imageWidth": 800,
+                        "imageHeight": 600,
+                        "url": "https://example.invalid/synthetic-image.jpg",
+                        "downloadUrl": "https://example.invalid/media/synthetic-image"
+                      }
+                    }
+                  }
+                ]
+              },
+              "content": {
+                "type": "doc",
+                "content": [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Synthetic example text",
+                        "marks": [
+                          {
+                            "type": "bold"
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "type": "asset",
+                    "attrs": {
+                      "assetId": "d59386e0-ae43-4e29-8fbe-0ebcdb954b75",
+                      "asset": {
+                        "id": "d59386e0-ae43-4e29-8fbe-0ebcdb954b75",
+                        "originalName": "example.jpg",
+                        "mimeType": "image/jpeg",
+                        "sizeBytes": 1024,
+                        "imageWidth": 800,
+                        "imageHeight": 600,
+                        "url": "https://example.invalid/synthetic-image.jpg",
+                        "downloadUrl": "https://example.invalid/media/synthetic-image"
+                      }
+                    }
+                  }
+                ]
+              },
+              "slug": "example-page"
+            },
+            "publishedAt": "2026-01-01T12:00:00.000Z",
+            "createdAt": "2026-01-01T11:00:00.000Z",
+            "updatedAt": "2026-01-01T12:00:00.000Z"
+          }
+        ],
+        "meta": {
+          "nextCursor": null,
+          "maxDepth": 1,
+          "locale": "nl"
+        }
+      },
+      "expanded": {
+        "data": {
+          "id": "af85c549-0c27-461d-8d40-5efbf34f5429",
+          "modelId": "ca392046-8f89-471e-979f-fb1dff75642b",
+          "url": null,
+          "status": "published",
+          "data": {
+            "title": "Example text",
+            "short": "Example text",
+            "intro": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Synthetic example text",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "asset",
+                  "attrs": {
+                    "assetId": "d59386e0-ae43-4e29-8fbe-0ebcdb954b75",
+                    "asset": {
+                      "id": "d59386e0-ae43-4e29-8fbe-0ebcdb954b75",
+                      "originalName": "example.jpg",
+                      "mimeType": "image/jpeg",
+                      "sizeBytes": 1024,
+                      "imageWidth": 800,
+                      "imageHeight": 600,
+                      "url": "https://example.invalid/synthetic-image.jpg",
+                      "downloadUrl": "https://example.invalid/media/synthetic-image"
+                    }
+                  }
+                }
+              ]
+            },
+            "content": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Synthetic example text",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "asset",
+                  "attrs": {
+                    "assetId": "d59386e0-ae43-4e29-8fbe-0ebcdb954b75",
+                    "asset": {
+                      "id": "d59386e0-ae43-4e29-8fbe-0ebcdb954b75",
+                      "originalName": "example.jpg",
+                      "mimeType": "image/jpeg",
+                      "sizeBytes": 1024,
+                      "imageWidth": 800,
+                      "imageHeight": 600,
+                      "url": "https://example.invalid/synthetic-image.jpg",
+                      "downloadUrl": "https://example.invalid/media/synthetic-image"
+                    }
+                  }
+                }
+              ]
+            },
+            "slug": "example-page"
+          },
+          "publishedAt": "2026-01-01T12:00:00.000Z",
+          "createdAt": "2026-01-01T11:00:00.000Z",
+          "updatedAt": "2026-01-01T12:00:00.000Z"
+        },
+        "meta": {
+          "maxDepth": 2,
+          "locale": "nl"
+        }
+      },
+      "missingFields": {
+        "data": {
+          "id": "af85c549-0c27-461d-8d40-5efbf34f5429",
+          "modelId": "ca392046-8f89-471e-979f-fb1dff75642b",
+          "url": null,
+          "status": "published",
+          "data": {},
+          "publishedAt": "2026-01-01T12:00:00.000Z",
+          "createdAt": "2026-01-01T11:00:00.000Z",
+          "updatedAt": "2026-01-01T12:00:00.000Z"
+        },
+        "meta": {
+          "maxDepth": 1,
+          "locale": "nl"
+        }
+      },
+      "unavailableRelations": {
+        "data": {
+          "id": "af85c549-0c27-461d-8d40-5efbf34f5429",
+          "modelId": "ca392046-8f89-471e-979f-fb1dff75642b",
+          "url": null,
+          "status": "published",
+          "data": {},
+          "publishedAt": "2026-01-01T12:00:00.000Z",
+          "createdAt": "2026-01-01T11:00:00.000Z",
+          "updatedAt": "2026-01-01T12:00:00.000Z"
+        },
+        "meta": {
+          "maxDepth": 1,
+          "locale": "nl"
+        }
+      }
+    }
+  },
+  "empty": {
+    "data": [],
+    "meta": {
+      "nextCursor": null,
+      "maxDepth": 1,
+      "locale": "nl"
+    }
+  },
+  "asset": {
+    "data": {
+      "id": "d59386e0-ae43-4e29-8fbe-0ebcdb954b75",
+      "originalName": "example.jpg",
+      "mimeType": "image/jpeg",
+      "sizeBytes": 1024,
+      "imageWidth": 800,
+      "imageHeight": 600,
+      "url": "https://example.invalid/synthetic-image.jpg",
+      "downloadUrl": "https://example.invalid/media/synthetic-image"
+    }
+  },
+  "missingRichTextAsset": {
+    "type": "asset",
+    "attrs": {
+      "assetId": "ffa63583-dfa6-406b-87d2-84b86b0d693a",
+      "asset": null
+    }
+  },
+  "error": {
+    "error": {
+      "code": "NOT_FOUND",
+      "message": "Published entry was not found",
+      "requestId": "synthetic-request-id"
+    }
+  }
+}

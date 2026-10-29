@@ -1,0 +1,127 @@
+---
+import { Image } from "astro:assets";
+import Base from "../layouts/Base.astro";
+import Hero from "../components/Hero.astro";
+import ServiceTiles from "../components/ServiceTiles.astro";
+import ContactBand from "../components/ContactBand.astro";
+import CmsError from "../components/CmsError.astro";
+import { getServices } from "../lib/cms";
+import { attempt } from "../lib/attempt";
+import { path, useTranslations, type Locale } from "../lib/i18n";
+import { projects } from "../lib/work";
+
+interface Props { locale: Locale }
+const { locale } = Astro.props;
+const t = useTranslations(locale);
+const services = await attempt(() => getServices(locale));
+---
+<Base locale={locale} section="home">
+  <Hero locale={locale} />
+
+  <section class="block services" aria-labelledby="services-title">
+    <div class="wrap">
+      <div class="head">
+        <h2 id="services-title">{t("services.title")}</h2>
+        <a class="all" href={path("services", locale)}>{t("services.all")}</a>
+      </div>
+      {services.ok ? <ServiceTiles services={services.value} locale={locale} /> : <CmsError locale={locale} />}
+    </div>
+  </section>
+
+  <section class="block work" aria-labelledby="work-title">
+    <div class="wrap">
+      <div class="head">
+        <h2 id="work-title">{t("work.highlight")}</h2>
+        <a class="all" href={path("work", locale)}>{t("work.all")}</a>
+      </div>
+      <ul class="strip">
+        {projects.map((project) => (
+          <li>
+            <a href={path("work", locale)}>
+              <Image src={project.image} alt="" widths={[400, 720]} sizes="(min-width: 56rem) 24rem, 100vw" />
+              <span>{project.name}</span>
+            </a>
+          </li>
+        ))}
+      </ul>
+    </div>
+  </section>
+
+  <ContactBand locale={locale} />
+</Base>
+
+<style>
+  .block {
+    padding-block: clamp(4rem, 9vw, 7rem);
+  }
+
+  .work {
+    padding-top: 0;
+  }
+
+  .head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1rem 2rem;
+    margin-bottom: clamp(2rem, 5vw, 3.5rem);
+  }
+
+  h2 {
+    max-width: 20ch;
+    font-size: var(--step-4);
+  }
+
+  .all {
+    font-weight: 600;
+    text-decoration-color: var(--rose);
+    text-decoration-thickness: 2px;
+  }
+
+  .strip {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 2rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .strip a {
+    display: block;
+    text-decoration: none;
+  }
+
+  .strip img {
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    object-fit: cover;
+    border: 1px solid var(--rule);
+    filter: saturate(0.85);
+    transition: filter 200ms ease;
+  }
+
+  .strip a:hover img {
+    filter: none;
+  }
+
+  .strip span {
+    display: block;
+    margin-top: 0.9rem;
+    font-size: var(--step-1);
+    font-weight: 650;
+  }
+
+  .strip a:hover span {
+    text-decoration: underline;
+    text-decoration-color: var(--rose);
+    text-decoration-thickness: 2px;
+  }
+
+  @media (max-width: 48rem) {
+    .strip {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

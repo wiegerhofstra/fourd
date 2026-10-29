@@ -1,0 +1,93 @@
+---
+import "../styles/global.css";
+import Header from "../components/Header.astro";
+import Footer from "../components/Footer.astro";
+import { company, defaultLocale, path, useTranslations, type Locale, type RouteKey } from "../lib/i18n";
+
+interface Props {
+  locale: Locale;
+  title?: string;
+  description?: string;
+  /** Highlights the matching navigation item. */
+  section?: RouteKey;
+  /** This page's path in every language, for the language switch and hreflang links. */
+  alternates?: Partial<Record<Locale, string>>;
+  image?: string;
+}
+
+const { locale, title, description, section, image } = Astro.props;
+const t = useTranslations(locale);
+const alternates = Astro.props.alternates ?? { nl: path("home", "nl"), en: path("home", "en") };
+const pageTitle = title ? `${title} | ${company.name}` : `${company.name}: ${t("hero.lead")} ${t("hero.phrases")[0]}`;
+const pageDescription = description ?? t("meta.description");
+const canonical = new URL(Astro.url.pathname, Astro.site);
+const organization = {
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  name: company.name,
+  url: Astro.site?.href,
+  logo: new URL("/apple-touch-icon.png", Astro.site).href,
+  email: company.email,
+  telephone: company.phone,
+  address: { "@type": "PostalAddress", streetAddress: company.street, postalCode: company.postalCode, addressLocality: company.city, addressCountry: "NL" },
+  sameAs: [company.linkedin],
+};
+---
+<!doctype html>
+<html lang={locale}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{pageTitle}</title>
+    <meta name="description" content={pageDescription} />
+    <link rel="canonical" href={canonical} />
+    {Object.entries(alternates).map(([lang, href]) => <link rel="alternate" hreflang={lang} href={new URL(href, Astro.site)} />)}
+    {alternates[defaultLocale] && <link rel="alternate" hreflang="x-default" href={new URL(alternates[defaultLocale], Astro.site)} />}
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <meta name="theme-color" content="#eceff4" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content={company.name} />
+    <meta property="og:title" content={pageTitle} />
+    <meta property="og:description" content={pageDescription} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:locale" content={locale === "nl" ? "nl_NL" : "en_GB"} />
+    {image && <meta property="og:image" content={new URL(image, Astro.site)} />}
+    <script type="application/ld+json" set:html={JSON.stringify(organization)} />
+  </head>
+  <body>
+    <a class="skip" href="#main">{t("nav.skip")}</a>
+    <Header locale={locale} section={section} alternates={alternates} />
+    <main id="main">
+      <slot />
+    </main>
+    <Footer locale={locale} />
+  </body>
+</html>
+
+<style>
+  body {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+  }
+
+  main {
+    flex: 1;
+  }
+
+  .skip {
+    position: absolute;
+    top: 0.75rem;
+    left: 0.75rem;
+    z-index: 100;
+    padding: 0.6em 1em;
+    background: var(--ink);
+    color: var(--paper);
+    transform: translateY(-200%);
+  }
+
+  .skip:focus {
+    transform: none;
+  }
+</style>

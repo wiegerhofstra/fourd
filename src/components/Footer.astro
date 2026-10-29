@@ -1,0 +1,105 @@
+---
+import LogoMark from "./LogoMark.astro";
+import { company, path, useTranslations, type Locale } from "../lib/i18n";
+
+interface Props { locale: Locale }
+const { locale } = Astro.props;
+const t = useTranslations(locale);
+const year = new Date().getFullYear();
+---
+<footer class="site-footer">
+  <div class="wrap grid">
+    <div class="brand">
+      <LogoMark class="mark" />
+      <p><b>FourD</b> Software</p>
+    </div>
+    <address>
+      {company.street}<br />
+      {company.postalCode} {company.city}
+    </address>
+    <ul>
+      <li><a href={`mailto:${company.email}`}>{company.email}</a></li>
+      <li><a href={company.phoneHref}>{company.phone}</a></li>
+      <li><a href={company.linkedin} rel="noopener noreferrer">LinkedIn</a></li>
+    </ul>
+    <ul>
+      <li><a href={path("services", locale)}>{t("nav.services")}</a></li>
+      <li><a href={path("work", locale)}>{t("nav.work")}</a></li>
+      <li><a href={path("contact", locale)}>{t("nav.contact")}</a></li>
+    </ul>
+  </div>
+  <p class="wrap legal">© {year} {company.name}. {t("footer.rights")}</p>
+</footer>
+
+<style>
+  .site-footer {
+    padding-block: 4rem 2rem;
+    background: var(--ink);
+    color: var(--face-light);
+    font-size: var(--step--1);
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: 2fr repeat(3, 1fr);
+    gap: 2rem;
+  }
+
+  .brand {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    color: var(--paper);
+    font-size: var(--step-1);
+  }
+
+  .brand b {
+    font-variation-settings: var(--display);
+    font-weight: 800;
+  }
+
+  .mark {
+    width: 1.4rem;
+    --logo-front: #8a8a8a;
+  }
+
+  address {
+    font-style: normal;
+  }
+
+  ul {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  li + li {
+    margin-top: 0.35rem;
+  }
+
+  a {
+    color: var(--paper);
+    text-decoration: none;
+  }
+
+  a:hover {
+    text-decoration: underline;
+  }
+
+  .legal {
+    margin-top: 3.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid #434c5e;
+    color: var(--face-mid);
+  }
+
+  @media (max-width: 48rem) {
+    .grid {
+      grid-template-columns: 1fr 1fr;
+    }
+
+    .brand {
+      grid-column: 1 / -1;
+    }
+  }
+</style>

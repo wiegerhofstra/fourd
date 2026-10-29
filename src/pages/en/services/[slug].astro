@@ -1,0 +1,9 @@
+---
+import ServiceView from "../../../views/ServiceView.astro";
+import NotFoundView from "../../../views/NotFoundView.astro";
+import { loadService } from "../../../lib/routes";
+
+const result = await loadService(Astro.params.slug, "en");
+if (result.status !== 200) Astro.response.status = result.status;
+---
+{result.status === 200 ? <ServiceView locale="en" {...result.props} /> : <NotFoundView locale="en" unavailable={result.status === 503} />}

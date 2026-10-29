@@ -1,0 +1,102 @@
+---
+import { company, useTranslations, type Locale } from "../lib/i18n";
+
+interface Props { locale: Locale; heading?: string; body?: string; level?: 1 | 2 }
+const { locale, level = 2 } = Astro.props;
+const t = useTranslations(locale);
+const heading = Astro.props.heading ?? t("contact.heading");
+const body = Astro.props.body ?? t("contact.intro");
+const Heading = `h${level}` as "h1" | "h2";
+---
+<section class="contact">
+  <div class="wrap layout">
+    <div class="intro">
+      <Heading>{heading}</Heading>
+      <p>{body}</p>
+    </div>
+    <dl class="channels">
+      <div>
+        <dt>{t("contact.mail")}</dt>
+        <dd><a href={`mailto:${company.email}`}>{company.email}</a></dd>
+      </div>
+      <div>
+        <dt>{t("contact.call")}</dt>
+        <dd><a href={company.phoneHref}>{company.phone}</a></dd>
+      </div>
+      <div>
+        <dt>{t("contact.visit")}</dt>
+        <dd>
+          <address>{company.name}<br />{company.street}<br />{company.postalCode} {company.city}</address>
+        </dd>
+      </div>
+    </dl>
+  </div>
+</section>
+
+<style>
+  .contact {
+    padding-block: clamp(4rem, 9vw, 7.5rem);
+    background: var(--ink);
+    color: var(--paper);
+  }
+
+  .layout {
+    display: grid;
+    grid-template-columns: minmax(0, 6fr) minmax(0, 5fr);
+    gap: clamp(2.5rem, 6vw, 6rem);
+    align-items: end;
+  }
+
+  h1,
+  h2 {
+    font-size: clamp(2.4rem, 1.3rem + 3.4vw, 4.4rem);
+  }
+
+  .intro p {
+    max-width: 34rem;
+    margin-top: 1.75rem;
+    color: var(--face-light);
+    font-size: var(--step-1);
+    line-height: 1.5;
+  }
+
+  .channels {
+    display: grid;
+    gap: 1.75rem;
+    margin: 0;
+  }
+
+  dt {
+    color: var(--face-mid);
+    font-size: var(--step--1);
+  }
+
+  dd {
+    margin: 0.2rem 0 0;
+    font-size: var(--step-1);
+  }
+
+  dd a {
+    font-variation-settings: "wdth" 112;
+    font-weight: 650;
+    text-decoration-color: var(--rose);
+    text-decoration-thickness: 2px;
+    overflow-wrap: anywhere;
+  }
+
+  dd a:hover {
+    color: #fff;
+    text-decoration-thickness: 4px;
+  }
+
+  address {
+    font-style: normal;
+    line-height: 1.45;
+  }
+
+  @media (max-width: 52rem) {
+    .layout {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

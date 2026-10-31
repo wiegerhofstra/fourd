@@ -98,7 +98,7 @@ export function createCmsClient(config: CmsClientConfig) {
       const page = await listEntries(model, { ...options, slug, limit: 1 });
       return page.data[0] ?? null;
     },
-    /** A fresh url for a stored asset ID. URLs expire after 300 seconds; never persist them. */
+    /** Resolve a stored asset ID to a stable cached media URL. Refresh after signing-secret rotation. */
     async getAsset(id: string, signal?: AbortSignal): Promise<{ data: DeliveryAsset }> {
       const body = await request(tenantBase + "/assets/" + encodeURIComponent(id), {}, signal);
       if (!body.data || typeof body.data !== "object" || !("url" in body.data) || typeof body.data.url !== "string") throw new CmsApiError(200, "INVALID_RESPONSE", "CMS asset is invalid", null);

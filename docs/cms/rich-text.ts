@@ -3,7 +3,7 @@
 import type { DeliveryAsset, RichTextNode } from "./types";
 
 export type RichTextOptions = {
-  /** Where an asset is served, e.g. (asset) => "/media/" + asset.id. Defaults to asset.url, which expires after 300 seconds. Return null to omit the asset. */
+  /** Where an asset is served, e.g. (asset) => "/media/" + asset.id. Defaults to the stable asset.url. Return null to omit the asset. */
   assetUrl?: (asset: DeliveryAsset) => string | null;
   /** Alternative text for images. The CMS stores no alt text, so the default is "" (decorative). */
   assetAlt?: (asset: DeliveryAsset) => string;

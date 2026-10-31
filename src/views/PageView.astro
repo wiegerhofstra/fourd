@@ -9,32 +9,43 @@ const { locale, page, service, otherServices, alternates } = Astro.props;
 const t = useTranslations(locale);
 // A page linked from a service is shown as that service: its title, intro and the other services.
 const title = service?.title ?? page.title;
+const linkedServices = otherServices.filter((other) => other.page);
 ---
 <Base locale={locale} section={service ? "services" : undefined} title={title} description={service?.short ?? undefined} alternates={alternates} image={page.cover?.src}>
-  <article>
-    <header class="wrap head">
-      {service && <a class="crumb" href={path("services", locale)}>{t("nav.services")}</a>}
-      <h1>{title}</h1>
-      {service?.intro ? <div class="lead" set:html={service.intro} /> : service?.short && <p class="lead">{service.short}</p>}
+  <article class:list={{ "has-cover": page.cover }}>
+    <header class="head on-dark">
+      <div class="wrap">
+        {service && <a class="crumb" href={path("services", locale)}>{t("nav.services")}</a>}
+        <h1>{title}</h1>
+        {service?.intro ? <div class="lead" set:html={service.intro} /> : service?.short && <p class="lead">{service.short}</p>}
+      </div>
     </header>
 
-    <div class:list={["wrap body", { "has-cover": page.cover }]}>
-      {page.content && <div class="prose" set:html={page.content} />}
-      {page.cover && (
+    {page.cover && (
+      <div class="wrap">
         <figure class="cover">
-          <img src={page.cover.src} width={page.cover.width} height={page.cover.height} alt="" />
+          <img src={page.cover.src} width={page.cover.width} height={page.cover.height} alt="" fetchpriority="high" />
         </figure>
-      )}
-    </div>
+      </div>
+    )}
+
+    {page.content && (
+      <div class="wrap body">
+        <div class="prose sheet" set:html={page.content} />
+      </div>
+    )}
   </article>
 
-  {otherServices.some((other) => other.page) && (
+  {linkedServices.length > 0 && (
     <nav class="wrap others" aria-labelledby="others-title">
       <h2 id="others-title">{t("service.other")}</h2>
       <ul>
-        {otherServices.map((other) => other.page && (
+        {linkedServices.map((other) => (
           <li>
-            <a href={other.page.href}>{other.title}</a>
+            <a href={other.page!.href}>
+              <span class="name">{other.title}</span>
+              {other.short && <span class="short">{other.short}</span>}
+            </a>
           </li>
         ))}
       </ul>
@@ -45,44 +56,78 @@ const title = service?.title ?? page.title;
 </Base>
 
 <style>
+  /* The page opens on a sheet of blueprint paper, continuing from the header. */
   .head {
-    padding-block: clamp(2.5rem, 7vw, 5rem) clamp(2rem, 5vw, 3.5rem);
+    --surface: var(--cobalt);
+    position: relative;
+    overflow: hidden;
+    padding-block: clamp(2.5rem, 7vw, 5.5rem) clamp(3rem, 7vw, 5.5rem);
+    background: var(--surface);
+    color: #fff;
+  }
+
+  /* The drafting grid from the home hero, fading in towards the right. */
+  .head::before {
+    content: "";
+    position: absolute;
+    inset: 0 0 0 40%;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='55.426' height='32' viewBox='0 0 55.426 32'%3E%3Cpath d='M0 0L55.426 32M0 32L55.426 0M0 0V32M27.713 0V32' stroke='%23ffffff' stroke-opacity='0.13' stroke-width='1' fill='none'/%3E%3C/svg%3E");
+    background-size: 55.426px 32px;
+    mask-image: linear-gradient(to right, transparent, #000 65%);
+    pointer-events: none;
+  }
+
+  .head .wrap {
+    position: relative;
+  }
+
+  /* With a cover, the sheet runs on underneath the top of the image. */
+  .has-cover .head {
+    padding-bottom: calc(clamp(3rem, 7vw, 5.5rem) + var(--overlap));
+  }
+
+  article {
+    --overlap: clamp(4rem, 12vw, 10rem);
   }
 
   .crumb {
     display: inline-block;
     margin-bottom: 1.5rem;
-    color: var(--slate);
+    color: var(--sky);
     font-weight: 600;
     text-decoration-color: var(--accent);
+    text-decoration-thickness: 2px;
+  }
+
+  .crumb:hover {
+    color: #fff;
   }
 
   h1 {
-    font-size: var(--step-5);
+    max-width: 16ch;
+    font-size: clamp(2.1rem, 0.9rem + 5.4vw, 6rem);
+    line-height: 1;
+    hyphens: auto;
   }
 
   .lead {
     max-width: 40rem;
     margin-top: 1.75rem;
-    color: var(--slate);
+    color: var(--on-dark);
     font-size: var(--step-1);
     line-height: 1.5;
   }
 
-  .body {
-    display: grid;
-    gap: clamp(2rem, 5vw, 5rem);
-    padding-bottom: clamp(3.5rem, 8vw, 6rem);
+  .lead :global(p + p) {
+    margin-top: 0.8em;
   }
 
-  .body.has-cover {
-    grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
-    align-items: start;
-  }
-
+  /* The cover is a wide plate extruded like the logo, straddling the edge of the blueprint. */
   .cover {
     --side: var(--extrude);
-    margin: 0 12px 0 0;
+    position: relative;
+    margin: calc(var(--overlap) * -1) 12px 0 0;
+    background: var(--paper-raised);
     box-shadow:
       2px 1px 0 var(--side), 4px 2px 0 var(--side), 6px 3px 0 var(--side),
       8px 4px 0 var(--side), 10px 5px 0 var(--side), 12px 6px 0 var(--side);
@@ -90,11 +135,141 @@ const title = service?.title ?? page.title;
 
   .cover img {
     width: 100%;
+    aspect-ratio: 21 / 9;
+    object-fit: cover;
   }
 
-  .others {
-    padding-block: 2.5rem clamp(4rem, 8vw, 6rem);
+  .body {
+    padding-block: clamp(3rem, 8vw, 6rem) clamp(4rem, 9vw, 7rem);
+  }
+
+  /*
+   * The page text reads like a specification sheet: the opening paragraph in large type,
+   * then each section ruled off, with its heading in the margin column and its text beside it.
+   */
+  .sheet {
+    display: grid;
+    grid-template-columns: minmax(0, 4fr) minmax(0, 7fr);
+    max-width: none;
+  }
+
+  .sheet > :global(*) {
+    grid-column: 2;
+    max-width: var(--measure);
+  }
+
+  .sheet > :global(* + *) {
+    margin-top: 1.1em;
+  }
+
+  .sheet > :global(*:first-child:not(h2)) {
+    grid-column: 1 / -1;
+    max-width: 48rem;
+    font-size: var(--step-2);
+    font-weight: 450;
+    line-height: 1.4;
+  }
+
+  .sheet > :global(h2) {
+    position: relative;
+    grid-column: 1;
+    padding-right: clamp(1.5rem, 4vw, 4rem);
+    font-size: var(--step-2);
+    line-height: 1.15;
+  }
+
+  /* A section's heading and first block share the rule that opens it. */
+  .sheet > :global(h2),
+  .sheet > :global(h2 + *) {
+    margin-top: clamp(2.5rem, 6vw, 4.5rem);
+    padding-top: 1.5rem;
     border-top: 1px solid var(--rule);
+  }
+
+  /* The accent tick that starts every ruled line on the site. */
+  .sheet > :global(h2)::before {
+    content: "";
+    position: absolute;
+    top: -2px;
+    left: 0;
+    width: 1.5rem;
+    height: 3px;
+    background: var(--accent);
+  }
+
+  .sheet :global(li > p) {
+    margin: 0;
+  }
+
+  /* Bulleted items are dashed like annotations on a drawing. */
+  .sheet :global(ul) {
+    padding: 0;
+    list-style: none;
+  }
+
+  .sheet :global(ul > li) {
+    position: relative;
+    padding-left: 1.75rem;
+  }
+
+  .sheet :global(ul > li)::before {
+    content: "";
+    position: absolute;
+    top: 0.8em;
+    left: 0;
+    width: 0.85rem;
+    height: 3px;
+    background: var(--accent);
+  }
+
+  .sheet :global(ul > li + li) {
+    margin-top: 0.75em;
+  }
+
+  /* Numbered lists are steps: each number set wide and heavy, in a column of its own. */
+  .sheet :global(ol) {
+    padding: 0;
+    list-style: none;
+    counter-reset: step;
+  }
+
+  .sheet :global(ol > li) {
+    position: relative;
+    padding-left: 3.25rem;
+    counter-increment: step;
+  }
+
+  .sheet :global(ol > li)::before {
+    content: counter(step);
+    position: absolute;
+    top: -0.1em;
+    left: 0;
+    color: var(--cobalt);
+    font-size: var(--step-2);
+    font-variation-settings: var(--display);
+    font-weight: 800;
+    line-height: 1;
+  }
+
+  .sheet :global(ol > li + li) {
+    margin-top: 1.25em;
+    padding-top: 1.25em;
+    border-top: 1px solid var(--rule);
+  }
+
+  .sheet :global(ol > li + li)::before {
+    top: calc(1.25em - 0.1em);
+  }
+
+  .sheet :global(ol strong) {
+    display: block;
+    font-variation-settings: var(--display);
+    font-weight: 750;
+  }
+
+  /* Other services: a row of ruled entries that point onward. */
+  .others {
+    padding-block: 0 clamp(4rem, 9vw, 7rem);
   }
 
   .others h2 {
@@ -102,34 +277,82 @@ const title = service?.title ?? page.title;
   }
 
   .others ul {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 1rem 2.5rem;
-    margin: 1.25rem 0 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+    gap: 2rem clamp(1.5rem, 3vw, 2.5rem);
+    margin: 1.5rem 0 0;
     padding: 0;
     list-style: none;
   }
 
   .others a {
-    font-size: var(--step-2);
-    font-variation-settings: var(--display);
-    font-weight: 750;
+    position: relative;
+    display: block;
+    height: 100%;
+    padding-top: 1.25rem;
+    border-top: 1px solid var(--rule);
     text-decoration: none;
   }
 
-  .others a:hover {
-    text-decoration: underline;
-    text-decoration-color: var(--accent);
-    text-decoration-thickness: 3px;
+  .others a::before {
+    content: "";
+    position: absolute;
+    top: -2px;
+    left: 0;
+    width: 1.5rem;
+    height: 3px;
+    background: var(--accent);
+    transition: width 350ms cubic-bezier(0.2, 0.7, 0.1, 1);
+  }
+
+  .name {
+    display: block;
+    font-size: var(--step-1);
+    font-variation-settings: var(--display);
+    font-weight: 800;
+    line-height: 1.15;
+    hyphens: auto;
+  }
+
+  .short {
+    display: block;
+    margin-top: 0.6rem;
+    color: var(--slate);
+    font-size: var(--step--1);
+    line-height: 1.5;
+  }
+
+  .others a:hover::before,
+  .others a:focus-visible::before {
+    width: 100%;
+  }
+
+  .others a:hover .name {
+    color: var(--cobalt);
   }
 
   @media (max-width: 52rem) {
-    .body.has-cover {
+    .sheet {
       grid-template-columns: 1fr;
     }
 
-    .cover {
-      grid-row: 1;
+    .sheet > :global(*),
+    .sheet > :global(h2) {
+      grid-column: 1;
+    }
+
+    .sheet > :global(h2 + *) {
+      margin-top: 1rem;
+      padding-top: 0;
+      border-top: 0;
+    }
+
+    .sheet > :global(*:first-child:not(h2)) {
+      font-size: var(--step-1);
+    }
+
+    .cover img {
+      aspect-ratio: 3 / 2;
     }
   }
 </style>

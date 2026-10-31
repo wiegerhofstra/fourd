@@ -34,7 +34,7 @@ export async function loadExample(entryId: string, assetId?: string) {
       }
     }
   }
-  // Asset IDs are stable; their URLs expire after 300 seconds. Resolve a fresh URL when serving the file.
+  // Asset IDs and URLs are stable. Refresh content after signing-secret rotation.
   const asset = assetId ? await cms.getAsset(assetId) : null;
   return { models, model, page, detail, asset };
 }

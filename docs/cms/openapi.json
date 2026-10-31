@@ -3,7 +3,7 @@
   "info": {
     "title": "CMS Content API",
     "version": "1.1.0",
-    "description": "Read-only content delivery. This schema snapshot describes one tenant. Unsupported: writes, draft preview, search, filters other than slug, and custom sorting. Translatable fields resolve per ?locale= with fallback to the default language. Assets can be re-resolved by ID for fresh URLs. The revalidate webhook describes the request the CMS sends to your website. Primitive fields pass through stored JSON; x-cms-editorSchema describes expected editor values, not delivery validation."
+    "description": "Read-only content delivery. This schema snapshot describes one tenant. Unsupported: writes, draft preview, search, filters other than slug, and custom sorting. Translatable fields resolve per ?locale= with fallback to the default language. Assets have stable URLs backed by the CMS disk cache. The revalidate webhook describes the request the CMS sends to your website. Primitive fields pass through stored JSON; x-cms-editorSchema describes expected editor values, not delivery validation."
   },
   "x-cms-schemaHash": "e770c7772dac9e580671f2b13d3de4fe5246a7bfcd09c97c89d03b462b0bdbbf",
   "servers": [
@@ -1000,8 +1000,8 @@
     "/api/content/{tenantSlug}/assets/{assetId}": {
       "get": {
         "operationId": "getAsset",
-        "summary": "Get an asset with a fresh URL",
-        "description": "Returns any ready, non-deleted asset of this tenant with a newly signed url (valid 300 seconds). Store asset IDs and call this when serving media, instead of persisting delivered URLs.",
+        "summary": "Get an asset with a stable media URL",
+        "description": "Returns any ready, non-deleted asset of this tenant with stable url and downloadUrl values. Both serve bytes through the CMS cache and check file access on every request. Store asset IDs as the source of truth; refresh URLs after signing-secret rotation.",
         "parameters": [
           {
             "name": "tenantSlug",
@@ -1543,12 +1543,12 @@
           "downloadUrl": {
             "type": "string",
             "format": "uri",
-            "description": "Durable file URL. Anyone with this URL can read this specific file until deletion or signing-secret rotation."
+            "description": "Stable cached file URL. Anyone with this URL can read this specific file until deletion or signing-secret rotation. Access is rechecked on every request."
           },
           "url": {
             "type": "string",
             "format": "uri",
-            "description": "Presigned read URL. Expires 300 seconds after issuance. Fetch fresh content to renew it."
+            "description": "Stable cached media URL, identical to downloadUrl. Does not expire on a timer. Access is revoked by deletion or signing-secret rotation."
           }
         },
         "required": [

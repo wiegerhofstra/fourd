@@ -22,18 +22,21 @@ test('static builds include localized pages and media, and reject incomplete CMS
   const pdfBytes = Buffer.from('%PDF-1.4\nsynthetic download\n%%EOF');
   const requests = [];
   let failure = null;
+  const failedOnce = new Set();
   let origin;
   const entry = (id, model, url, data) => ({
     id, modelId: modelIds[model], url, data, status: 'published', pageParentId: null,
     createdAt: '2026-01-01T00:00:00Z', updatedAt: '2026-01-01T00:00:00Z', publishedAt: '2026-01-01T00:00:00Z',
   });
-  const asset = (id, fresh = false) => ({
+  // Asset url and downloadUrl are the same stable CMS file URL.
+  const fileUrl = (id) => `${origin}/files/${id}?signature=must-not-be-published`;
+  const asset = (id) => ({
     id, mimeType: id === imageId ? 'image/png' : 'application/pdf',
     originalName: id === imageId ? 'example.png' : 'brochure.pdf',
     sizeBytes: id === imageId ? imageBytes.length : pdfBytes.length,
     imageWidth: id === imageId ? 1 : null, imageHeight: id === imageId ? 1 : null,
-    url: `${origin}/${fresh ? 'files' : 'expired'}/${id}?signature=must-not-be-published`,
-    downloadUrl: `${origin}/download/${id}`,
+    url: fileUrl(id),
+    downloadUrl: fileUrl(id),
   });
   const server = createServer((req, res) => {
     const url = new URL(req.url, origin);
@@ -43,13 +46,17 @@ test('static builds include localized pages and media, and reject incomplete CMS
       res.end(JSON.stringify(data));
     };
     if (url.pathname.startsWith('/files/')) {
-      if (failure === 'asset') return json({ error: { message: 'Unavailable file' } }, 503);
       const id = url.pathname.split('/').at(-1);
+      // Every file is briefly unavailable once; the build must retry rather than fail.
+      if (failure === 'asset' || !failedOnce.has(id)) {
+        failedOnce.add(id);
+        return json({ error: { message: 'Unavailable file' } }, 503);
+      }
       res.writeHead(200, { 'Content-Type': id === imageId ? 'image/png' : 'application/pdf' });
       return res.end(id === imageId ? imageBytes : pdfBytes);
     }
     if (req.headers.authorization !== `Bearer ${token}`) return json({ error: { message: 'Unauthorized' } }, 401);
-    if (url.pathname.includes('/assets/')) return json({ data: asset(url.pathname.split('/').at(-1), true) });
+    if (url.pathname.includes('/assets/')) return json({ data: asset(url.pathname.split('/').at(-1)) });
     const model = /\/models\/(page|service|menu)\/entries$/.exec(url.pathname)?.[1];
     if (!model) return json({ error: { message: 'Unknown request' } }, 404);
     if (failure === 'cms' && model === 'menu') return json({ error: { message: 'CMS unavailable' } }, 503);
@@ -62,7 +69,7 @@ test('static builds include localized pages and media, and reject incomplete CMS
         { type: 'asset', attrs: { asset: asset(imageId) } },
         { type: 'asset', attrs: { asset: null } },
         { type: 'paragraph', content: [{ type: 'text', text: 'Download brochure', marks: [
-          { type: 'link', attrs: { kind: 'asset', assetId: pdfId, href: `${origin}/download/${pdfId}` } },
+          { type: 'link', attrs: { kind: 'asset', assetId: pdfId, href: fileUrl(pdfId) } },
         ] }] },
       ] },
     });
@@ -120,11 +127,11 @@ test('static builds include localized pages and media, and reject incomplete CMS
   assert.match(redirect, /http-equiv="refresh"/);
   assert.match(redirect, /url=\/mobile-apps/);
   assert.ok(requests.some((path) => path.includes('cursor=page-2')), 'Pagination must be followed');
-  assert.equal(requests.filter((path) => path.startsWith('/files/')).length, 2, 'Each asset should download once across locales');
+  assert.equal(requests.filter((path) => path.startsWith('/files/')).length, 4, 'Each asset should download once across locales, after one retry');
   for (const file of await readdir(good.directory, { recursive: true, withFileTypes: true })) {
     if (!file.isFile()) continue;
     const body = await readFile(join(file.parentPath, file.name));
-    for (const forbidden of [token, 'signature=must-not-be-published', `${origin}/download/`]) {
+    for (const forbidden of [token, 'signature=must-not-be-published', `${origin}/files/`]) {
       assert.equal(body.includes(Buffer.from(forbidden)), false, `${file.name} contains private or remote build data`);
     }
   }

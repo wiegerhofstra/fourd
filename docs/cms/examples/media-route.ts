@@ -17,9 +17,9 @@ export async function GET(_request: Request, context: { params: Promise<{ assetI
   if (!assetIdPattern.test(assetId)) return new Response(null, { status: 404 });
   try {
     const { data } = await cms().getAsset(assetId);
-    // The signed URL is valid for 300 seconds, so the redirect may only be cached briefly.
-    // To cache for longer, fetch data.url and stream the bytes with an immutable Cache-Control instead.
-    return new Response(null, { status: 302, headers: { Location: data.url, "Cache-Control": "public, max-age=60" } });
+    // The CMS serves cached bytes and checks file access on each request.
+    // Directly rendering data.url avoids this extra redirect entirely.
+    return new Response(null, { status: 302, headers: { Location: data.url, "Cache-Control": "private, no-store" } });
   } catch (error) {
     if (error instanceof CmsApiError && error.status === 404) return new Response(null, { status: 404, headers: { "Cache-Control": "no-store" } });
     throw error;

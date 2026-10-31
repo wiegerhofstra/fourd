@@ -71,12 +71,12 @@
         "downloadUrl": {
           "type": "string",
           "format": "uri",
-          "description": "Durable file URL. Anyone with this URL can read this specific file until deletion or signing-secret rotation."
+          "description": "Stable cached file URL. Anyone with this URL can read this specific file until deletion or signing-secret rotation. Access is rechecked on every request."
         },
         "url": {
           "type": "string",
           "format": "uri",
-          "description": "Presigned read URL. Expires 300 seconds after issuance. Fetch fresh content to renew it."
+          "description": "Stable cached media URL, identical to downloadUrl. Does not expire on a timer. Access is revoked by deletion or signing-secret rotation."
         }
       },
       "required": [

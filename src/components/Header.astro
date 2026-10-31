@@ -1,19 +1,14 @@
 ---
 import LogoMark from "./LogoMark.astro";
-import { getMenu, type MenuItem } from "../lib/cms";
+import { getMenu } from "../lib/cms";
 import { locales, path, useTranslations, type Locale, type RouteKey } from "../lib/i18n";
 
 interface Props { locale: Locale; section?: RouteKey; alternates: Partial<Record<Locale, string>> }
 const { locale, section, alternates } = Astro.props;
 const t = useTranslations(locale);
 
-// Pages an editor adds to a CMS menu appear after the fixed sections. The site still works without them.
-let cmsItems: MenuItem[] = [];
-try {
-  cmsItems = await getMenu(locale);
-} catch (error) {
-  console.error("[cms] Menu unavailable", error);
-}
+// Fail the build if navigation cannot be loaded; an empty published menu is valid.
+const cmsItems = await getMenu(locale);
 
 const items = [
   { href: path("services", locale), label: t("nav.services"), current: section === "services" },

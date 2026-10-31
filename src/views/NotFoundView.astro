@@ -3,12 +3,12 @@ import Base from "../layouts/Base.astro";
 import PageIntro from "../components/PageIntro.astro";
 import { path, useTranslations, type Locale } from "../lib/i18n";
 
-interface Props { locale: Locale; /** The CMS could not be reached, rather than the page not existing. */ unavailable?: boolean }
-const { locale, unavailable = false } = Astro.props;
+interface Props { locale: Locale }
+const { locale } = Astro.props;
 const t = useTranslations(locale);
 ---
-<Base locale={locale} title={unavailable ? t("error.unavailable") : t("error.title")}>
-  <PageIntro title={unavailable ? t("error.unavailable") : t("error.title")} lead={unavailable ? t("error.cms") : t("error.body")}>
+<Base locale={locale} title={t("error.title")}>
+  <PageIntro title={t("error.title")} lead={t("error.body")}>
     <div class="actions">
       <a class="button" href={path("home", locale)}>{t("error.home")}</a>
       <a class="button is-quiet" href={path("services", locale)}>{t("nav.services")}</a>

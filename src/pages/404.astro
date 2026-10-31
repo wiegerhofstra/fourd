@@ -1,6 +1,4 @@
 ---
 import NotFoundView from "../views/NotFoundView.astro";
-
-const locale = Astro.url.pathname.startsWith("/en/") ? "en" : "nl";
 ---
-<NotFoundView locale={locale} />
+<NotFoundView locale="nl" />

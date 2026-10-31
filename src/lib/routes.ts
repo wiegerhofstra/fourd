@@ -1,65 +1,58 @@
-// Routing for CMS pages, shared by the Dutch and English catch-all routes.
-import { getPageHref, getServices, resolvePath, type Page, type Service } from "./cms";
-import { locales, type Locale } from "./i18n";
+// Enumerate CMS pages and known legacy URLs for Astro's static build.
+import { getPages, getServices, type Page, type Service } from "./cms";
+import { locales, path, type Locale } from "./i18n";
 
 export type PageProps = {
   page: Page;
-  /** The service that links to this page, if any: the page is then shown as a service page. */
   service: Service | null;
   otherServices: Service[];
   alternates: Partial<Record<Locale, string>>;
 };
 
-export type Loaded = { status: 200; props: PageProps } | { status: 308; location: string } | { status: 404 | 503 };
+export type StaticPageProps = { pageProps: PageProps; redirect?: never } | { redirect: string; pageProps?: never };
 
-// The previous site served services at /diensten/<name>; they now live at the CMS page's own URL.
-const legacyServicePrefix = /^\/diensten\/([^/]+)$/;
-const legacyServiceAliases: Record<string, string> = { applicaties: "mobile-apps" };
-
-/** Paths of the same page in each language; slugs can be translated, so they are looked up by ID. */
-async function alternatesFor(page: Page, locale: Locale) {
-  const alternates: Partial<Record<Locale, string>> = { [locale]: page.href };
-  await Promise.all(locales.filter((code) => code !== locale).map(async (code) => {
-    try {
-      const href = await getPageHref(page.id, code);
-      if (href) alternates[code] = href;
-    } catch (error) {
-      console.error("[cms] Translated page URL unavailable", error);
+export async function getPagePaths(locale: Locale) {
+  const [pagesByLocale, services] = await Promise.all([
+    Promise.all(locales.map(async (code) => [code, await getPages(code)] as const)),
+    getServices(locale),
+  ]);
+  const pages = pagesByLocale.find(([code]) => code === locale)![1];
+  const fixedPaths = new Set([
+    ...(["home", "services", "work", "contact"] as const).map((key) => path(key, locale).replace(/\/$/, "")),
+    locale === "nl" ? "/404" : "/en/404",
+    ...(locale === "nl" ? ["/home"] : []),
+  ]);
+  const routes = new Map<string, StaticPageProps>();
+  for (const page of pages) {
+    const href = page.href.replace(/\/$/, "");
+    if (fixedPaths.has(href)) continue;
+    if (locale === "nl" && (href === "/en" || href.startsWith("/en/"))) {
+      throw new Error(`CMS page conflicts with the English route namespace: ${href}`);
     }
-  }));
-  return alternates;
-}
-
-/** Resolves a request path without its language prefix, e.g. "/maatwerk" for /en/maatwerk. */
-export async function loadPage(path: string, locale: Locale): Promise<Loaded> {
-  try {
-    const resolution = await resolvePath(path, locale);
-
-    const legacy = resolution.kind === "missing" && locale === "nl" ? legacyServicePrefix.exec(path) : null;
-    if (legacy) {
-      const name = legacy[1]!;
-      const target = await resolvePath("/" + (legacyServiceAliases[name] ?? name), locale);
-      if (target.kind === "page") return { status: 308, location: target.page.href };
-      if (target.kind === "redirect") return { status: 308, location: target.location };
-    }
-
-    if (resolution.kind === "redirect") return { status: 308, location: resolution.location };
-    if (resolution.kind === "missing") return { status: 404 };
-
-    const { page } = resolution;
-    const [services, alternates] = await Promise.all([getServices(locale), alternatesFor(page, locale)]);
+    if (routes.has(href)) throw new Error(`Multiple CMS pages use ${href}`);
     const service = services.find((candidate) => candidate.page?.id === page.id) ?? null;
-    return {
-      status: 200,
-      props: { page, service, otherServices: service ? services.filter((other) => other.id !== service.id) : [], alternates },
-    };
-  } catch (error) {
-    console.error("[cms] Page unavailable", error);
-    return { status: 503 };
+    const alternates: Partial<Record<Locale, string>> = {};
+    for (const [code, translatedPages] of pagesByLocale) {
+      const translated = translatedPages.find((candidate) => candidate.id === page.id);
+      if (translated) alternates[code] = translated.href;
+    }
+    routes.set(href, { pageProps: {
+      page, service, otherServices: service ? services.filter((other) => other.id !== service.id) : [], alternates,
+    } });
   }
-}
-
-/** The CMS path for a catch-all route parameter: "/" plus the segments, with no trailing slash. */
-export function cmsPath(param: string | undefined) {
-  return "/" + (param ?? "").replace(/^\/+|\/+$/g, "");
+  // Preserve the former /diensten/<name> links without a runtime CMS resolver.
+  if (locale === "nl") {
+    for (const page of pages) {
+      if (!/^\/[^/]+$/.test(page.href) || fixedPaths.has(page.href)) continue;
+      const aliases = ["/diensten" + page.href];
+      if (page.href === "/mobile-apps") aliases.push("/diensten/applicaties");
+      for (const alias of aliases) {
+        if (!routes.has(alias)) routes.set(alias, { redirect: page.href });
+      }
+    }
+  }
+  return [...routes].map(([href, props]) => ({
+    params: { path: (locale === "en" ? href.slice(4) : href.slice(1)) },
+    props,
+  }));
 }

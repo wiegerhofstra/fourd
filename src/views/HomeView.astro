@@ -4,16 +4,14 @@ import Base from "../layouts/Base.astro";
 import Hero from "../components/Hero.astro";
 import ServiceList from "../components/ServiceList.astro";
 import ContactBand from "../components/ContactBand.astro";
-import CmsError from "../components/CmsError.astro";
 import { getServices } from "../lib/cms";
-import { attempt } from "../lib/attempt";
 import { path, useTranslations, type Locale } from "../lib/i18n";
 import { projects } from "../lib/work";
 
 interface Props { locale: Locale }
 const { locale } = Astro.props;
 const t = useTranslations(locale);
-const services = await attempt(() => getServices(locale));
+const services = await getServices(locale);
 ---
 <Base locale={locale} section="home">
   <Hero locale={locale} />
@@ -24,7 +22,7 @@ const services = await attempt(() => getServices(locale));
         <h2 id="services-title">{t("services.title")}</h2>
         <a class="all" href={path("services", locale)}>{t("services.all")}</a>
       </div>
-      {services.ok ? <ServiceList services={services.value} locale={locale} /> : <CmsError locale={locale} />}
+      <ServiceList services={services} locale={locale} />
     </div>
   </section>
 

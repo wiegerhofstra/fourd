@@ -11,10 +11,10 @@
     "preview": "astro preview",
     "astro": "astro",
     "cms:docs": "node scripts/update-cms-docs.mjs",
-    "update_cms_documentation": "npm run cms:docs"
+    "update_cms_documentation": "npm run cms:docs",
+    "test:static": "node --test scripts/static-build.test.mjs"
   },
   "dependencies": {
-    "@astrojs/node": "^11.1.9",
     "@fontsource-variable/archivo": "^5.3.0",
     "astro": "^7.4.4"
   },

@@ -1,20 +1,17 @@
-// Server-only access to FourD CMS content, shaped for the website.
-// The client, types, rich-text renderer and revalidation handler are generated into docs/cms/ by
+// Build-time access to FourD CMS content, shaped for the static website.
+// The client, types and rich-text renderer are generated into docs/cms/ by
 // `npm run cms:docs`; they are imported from there so a refresh updates the integration directly.
-import { CMS_ACCESS_TOKEN, CMS_CACHE_SECONDS, CMS_TENANT_SLUG, CMS_URL } from "astro:env/server";
-import { CmsApiError, createCmsClient } from "../../docs/cms/client";
+import { CMS_ACCESS_TOKEN, CMS_TENANT_SLUG, CMS_URL } from "astro:env/server";
+import { createCmsClient } from "../../docs/cms/client";
 import { renderRichText } from "../../docs/cms/rich-text";
 import { isExpandedEntry, modelSlugById, type DeliveryAsset, type DeliveryEntry } from "../../docs/cms/types";
-import { localize, type Locale } from "./i18n";
-
-export { CmsApiError };
+import { locales, localize, type Locale } from "./i18n";
 
 export const cms = createCmsClient({ origin: CMS_URL, tenantSlug: CMS_TENANT_SLUG, token: CMS_ACCESS_TOKEN });
 
 // --- Cache -------------------------------------------------------------------------------------
-// The CMS answers with no-store, so caching is ours. Everything is keyed by request and dropped at
-// once by the revalidation endpoint (src/pages/api/revalidate.ts) or after CMS_CACHE_SECONDS.
-// Failed requests, including 404s, are never cached.
+// Share one content snapshot per locale throughout a build. In development, refresh after five
+// seconds so editor changes are visible without restarting Astro. Failures must stop the build.
 
 const cache = new Map<string, { expires: number; value: Promise<unknown> }>();
 
@@ -22,13 +19,9 @@ function cached<T>(key: string, load: () => Promise<T>): Promise<T> {
   const hit = cache.get(key);
   if (hit && hit.expires > Date.now()) return hit.value as Promise<T>;
   const value = load();
-  cache.set(key, { expires: Date.now() + CMS_CACHE_SECONDS * 1000, value });
+  cache.set(key, { expires: Date.now() + (import.meta.env.DEV ? 5000 : Infinity), value });
   value.catch(() => { if (cache.get(key)?.value === value) cache.delete(key); });
   return value;
-}
-
-export function invalidateCmsCache() {
-  cache.clear();
 }
 
 // --- Field validation ----------------------------------------------------------------------------
@@ -40,7 +33,7 @@ function text(value: unknown): string | null {
 
 function richText(value: unknown): string | null {
   if (!value || typeof value !== "object" || Array.isArray(value)) return null;
-  const html = renderRichText(value, { assetUrl: (asset) => mediaUrl(asset.id) });
+  const html = renderRichText(value, { assetUrl: mediaUrl });
   return html.replace(/<p>(<br>)?<\/p>/g, "").trim() || null;
 }
 
@@ -48,12 +41,28 @@ function image(value: unknown): Image | null {
   if (!value || typeof value !== "object" || !("id" in value) || typeof value.id !== "string") return null;
   const raw = value as DeliveryAsset;
   if (typeof raw.mimeType !== "string" || !raw.mimeType.startsWith("image/")) return null;
-  return { src: mediaUrl(raw.id), width: raw.imageWidth ?? undefined, height: raw.imageHeight ?? undefined };
+  return { src: mediaUrl(raw), width: raw.imageWidth ?? undefined, height: raw.imageHeight ?? undefined };
 }
 
-/** A stable URL for an asset; src/pages/media/[assetId].ts resolves it to the file. */
-export function mediaUrl(assetId: string) {
-  return "/media/" + encodeURIComponent(assetId);
+// Extensions let a static web server select the correct MIME type. Unknown/active document
+// formats use .bin so they download instead of executing as pages on the website's origin.
+const mediaExtensions: Record<string, string> = {
+  "image/jpeg": "jpg", "image/png": "png", "image/webp": "webp", "image/avif": "avif",
+  "image/gif": "gif", "image/svg+xml": "svg", "image/bmp": "bmp", "image/x-icon": "ico",
+  "application/pdf": "pdf", "video/mp4": "mp4", "video/webm": "webm",
+  "audio/mpeg": "mp3", "audio/ogg": "ogg", "audio/wav": "wav",
+};
+
+export function mediaFilename(asset: DeliveryAsset) {
+  if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(asset.id)) {
+    throw new Error("CMS returned an invalid asset ID");
+  }
+  return asset.id + "." + (mediaExtensions[asset.mimeType] ?? "bin");
+}
+
+/** A local file emitted by the static media endpoint during the build. */
+export function mediaUrl(asset: DeliveryAsset) {
+  return "/media/" + mediaFilename(asset);
 }
 
 // --- Content -------------------------------------------------------------------------------------
@@ -90,10 +99,67 @@ async function all(model: string, locale: Locale, maxDepth: number) {
   return entries;
 }
 
+/** Visit nested components and rich text as well as top-level fields. */
+function visit(value: unknown, fn: (record: Record<string, unknown>) => void) {
+  if (!value || typeof value !== "object") return;
+  if (Array.isArray(value)) {
+    value.forEach((child) => visit(child, fn));
+    return;
+  }
+  const record = value as Record<string, unknown>;
+  fn(record);
+  Object.values(record).forEach((child) => visit(child, fn));
+}
+
+function snapshot(locale: Locale) {
+  return cached("snapshot:" + locale, async () => {
+    const [pages, services, menus] = await Promise.all([
+      all("page", locale, 1), all("service", locale, 2), all("menu", locale, 2),
+    ]);
+    const pageEntries = new Map<string, DeliveryEntry>();
+    const assets = new Map<string, DeliveryAsset>();
+    const assetLinks: Record<string, unknown>[] = [];
+    visit([pages, services, menus], (record) => {
+      // Collections omit component children; service and menu expansions include those pages.
+      if (isExpandedEntry(record) && modelSlugById[record.modelId] === "page") {
+        pageEntries.set(record.id, record);
+      }
+      if (typeof record.id === "string" && typeof record.mimeType === "string" && typeof record.url === "string") {
+        assets.set(record.id, record as DeliveryAsset);
+      }
+      if (record.kind === "asset" && typeof record.assetId === "string" && typeof record.href === "string" && !record.missing) {
+        assetLinks.push(record);
+      }
+    });
+    // Link marks have an asset ID and durable download URL but no embedded asset metadata.
+    for (const link of assetLinks) {
+      const id = link.assetId as string;
+      if (!assets.has(id)) assets.set(id, (await cms.getAsset(id)).data);
+      link.href = mediaUrl(assets.get(id)!);
+    }
+    return { pageEntries: [...pageEntries.values()], services, menus, assets: [...assets.values()] };
+  });
+}
+
+/** Enumerate every published page, including pages nested in services and menus. */
+export async function getPages(locale: Locale): Promise<Page[]> {
+  return (await snapshot(locale)).pageEntries.flatMap((entry) => {
+    const page = toPage(entry, locale);
+    if (entry.url && !page) throw new Error(`CMS page ${entry.id} is missing a usable title`);
+    return page ? [page] : [];
+  });
+}
+
+/** Deduplicate media across languages; files are immutable for a given CMS asset ID. */
+export async function getAssets(): Promise<DeliveryAsset[]> {
+  const snapshots = await Promise.all(locales.map(snapshot));
+  return [...new Map(snapshots.flatMap(({ assets }) => assets.map((asset) => [asset.id, asset] as const))).values()];
+}
+
 /** Services in the order editors created them (the API returns newest first), with their linked page. */
 export function getServices(locale: Locale): Promise<Service[]> {
   return cached("services:" + locale, async () => {
-    const entries = await all("service", locale, 2);
+    const { services: entries } = await snapshot(locale);
     return entries
       .sort((a, b) => a.createdAt.localeCompare(b.createdAt))
       .map((entry) => toService(entry, locale))
@@ -104,37 +170,11 @@ export function getServices(locale: Locale): Promise<Service[]> {
 /** Pages linked from the first menu in the CMS, in editor order. Empty when no menu is published. */
 export function getMenu(locale: Locale): Promise<MenuItem[]> {
   return cached("menu:" + locale, async () => {
-    const [menu] = await all("menu", locale, 2);
+    const { menus: [menu] } = await snapshot(locale);
     const items = Array.isArray(menu?.data.items) ? menu.data.items : [];
     return items.flatMap((item): MenuItem[] => {
       const page = toPage(item, locale);
       return page ? [{ href: page.href, title: page.title }] : [];
     });
-  });
-}
-
-export type Resolution = { kind: "page"; page: Page } | { kind: "redirect"; location: string } | { kind: "missing" };
-
-/**
- * Resolves a CMS path (without the language prefix, e.g. "/maatwerk") to a page or a permanent
- * redirect. Unknown paths, and paths the CMS rejects as malformed, are "missing".
- */
-export function resolvePath(path: string, locale: Locale): Promise<Resolution> {
-  return cached(`resolve:${locale}:${path}`, async (): Promise<Resolution> => {
-    const { data } = await cms.resolvePage(path, { locale });
-    if (data.kind === "redirect") return { kind: "redirect", location: localize(data.location, locale) };
-    const page = data.modelSlug === "page" ? toPage(data.entry, locale) : null;
-    return page ? { kind: "page", page } : { kind: "missing" };
-  }).catch((error: unknown): Resolution => {
-    if (error instanceof CmsApiError && (error.status === 404 || error.status === 400)) return { kind: "missing" };
-    throw error;
-  });
-}
-
-/** The page's URL on this site in another language; slugs can be translated. */
-export function getPageHref(id: string, locale: Locale): Promise<string | null> {
-  return cached(`page-href:${locale}:${id}`, async () => {
-    const { data } = await cms.getEntry("page", id, { locale });
-    return data.url ? localize(data.url, locale) : null;
   });
 }

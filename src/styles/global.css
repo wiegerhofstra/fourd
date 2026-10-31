@@ -1,23 +1,40 @@
 @import "@fontsource-variable/archivo/wdth.css";
 
 :root {
-  /* Brand: the Nord-derived slate and rose of the previous site, plus the faces of the isometric logo. */
-  --paper: #eceff4;
-  --paper-raised: #f6f7fa;
-  --ink: #2e3440;
-  --slate: #4c566a;
-  --rose: #bf616a;
-  --rose-deep: #a34d56; /* rose at text contrast (5.2:1 on paper) */
-  --rose-shade: #7c3940;
-  --face-light: #d8dee9;
-  --face-mid: #a3abba;
-  --face-dark: var(--slate);
-  --rule: #c9d0dc;
+  /*
+   * Blueprint: cobalt drawing paper with white linework and signal-yellow annotations.
+   * Light pages are the pale paper; the hero, header and contact sections are the blueprint itself.
+   */
+  --paper: #f3f6fc;
+  --paper-raised: #ffffff;
+  --ink: #0f1e4a; /* navy: body text, and the darkest surfaces */
+  --slate: #46557c;
+  --cobalt: #1c3f94;
+  --cobalt-deep: #163377;
+  --sky: #a9c1ff; /* secondary text on cobalt and navy */
+  --on-dark: #dbe5ff; /* body text on cobalt and navy */
+  --signal: #ffd23f; /* annotations and calls to action on dark surfaces */
+  --signal-shade: #b38f00;
+  --extrude: #b6c2de; /* extruded sides of raised elements */
+  --rule: #d5dcec;
 
-  /* The logo's own face colours. */
-  --logo-top: #aaa;
-  --logo-side: #eee;
-  --logo-front: #666;
+  /* Accents follow the surface: cobalt on paper, signal yellow on dark sections (see .on-dark). */
+  --accent: var(--cobalt);
+  --accent-text: var(--cobalt);
+  --button-face: var(--cobalt);
+  --button-shade: var(--ink);
+  --button-text: #fff;
+  --button-hover: #2a4fae;
+  --quiet-shade: var(--extrude);
+  --quiet-text: var(--ink);
+
+  /* The logo as white linework on translucent faces, drawn on cobalt or navy. */
+  --logo-top: rgb(255 255 255 / 0.22);
+  --logo-side: rgb(255 255 255 / 0.12);
+  --logo-front: rgb(255 255 255 / 0.04);
+  --logo-line: #fff;
+  --logo-accent: #fff;
+
 
   --font: "Archivo Variable", "Archivo", system-ui, sans-serif;
   /* Wide, heavy headlines echo the extruded 4 in the logo; body text keeps the normal width. */
@@ -93,13 +110,25 @@ a {
 }
 
 :focus-visible {
-  outline: 3px solid var(--rose);
+  outline: 3px solid var(--accent);
   outline-offset: 3px;
 }
 
 ::selection {
-  background: var(--rose);
-  color: var(--paper-raised);
+  background: var(--signal);
+  color: var(--ink);
+}
+
+/* Dark sections: the hero, header, contact band and footer. */
+.on-dark {
+  --accent: var(--signal);
+  --accent-text: var(--signal);
+  --button-face: var(--signal);
+  --button-shade: var(--signal-shade);
+  --button-text: var(--ink);
+  --button-hover: #ffdc66;
+  --quiet-shade: #8ea6e6;
+  --quiet-text: var(--cobalt-deep);
 }
 
 .wrap {
@@ -120,45 +149,46 @@ a {
 
 /* Buttons are raised blocks extruded along the 2:1 isometric axis; pressing pushes them in. */
 .button {
-  --button-face: var(--rose-deep);
-  --button-side: var(--rose-shade);
+  --face: var(--button-face);
+  --side: var(--button-shade);
   position: relative;
   display: inline-flex;
   align-items: center;
   gap: 0.6em;
   padding: 0.85em 1.4em;
-  background: var(--button-face);
-  color: var(--paper-raised);
+  background: var(--face);
+  color: var(--button-text);
   font-weight: 650;
   text-decoration: none;
   box-shadow:
-    2px 1px 0 var(--button-side),
-    4px 2px 0 var(--button-side),
-    6px 3px 0 var(--button-side),
-    8px 4px 0 var(--button-side),
-    10px 5px 0 var(--button-side);
+    2px 1px 0 var(--side),
+    4px 2px 0 var(--side),
+    6px 3px 0 var(--side),
+    8px 4px 0 var(--side),
+    10px 5px 0 var(--side);
   transition: transform 120ms ease, box-shadow 120ms ease;
 }
 
 .button:hover {
-  --button-face: #ad5660;
+  --face: var(--button-hover);
 }
 
 .button:active {
   transform: translate(6px, 3px);
   box-shadow:
-    2px 1px 0 var(--button-side),
-    4px 2px 0 var(--button-side);
+    2px 1px 0 var(--side),
+    4px 2px 0 var(--side);
 }
 
 .button.is-quiet {
-  --button-face: var(--paper-raised);
-  --button-side: var(--face-mid);
-  color: var(--ink);
+  --face: var(--paper-raised);
+  --side: var(--quiet-shade);
+  color: var(--quiet-text);
 }
 
 .button.is-quiet:hover {
-  --button-face: #fff;
+  --face: #fff;
+  --side: var(--accent);
 }
 
 /* Long-form CMS text. */
@@ -184,7 +214,7 @@ a {
 }
 
 .prose a {
-  color: var(--rose-deep);
+  color: var(--accent-text);
   text-decoration-thickness: 2px;
 }
 
@@ -200,7 +230,7 @@ a {
 .prose blockquote {
   margin-inline: 0;
   padding-left: 1.25em;
-  border-left: 4px solid var(--rose);
+  border-left: 4px solid var(--accent);
   font-size: var(--step-1);
   line-height: 1.4;
 }

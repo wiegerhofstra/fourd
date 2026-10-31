@@ -1,34 +1,42 @@
 ---
 import { company, useTranslations, type Locale } from "../lib/i18n";
 
-interface Props { locale: Locale; heading?: string; body?: string; level?: 1 | 2 }
-const { locale, level = 2 } = Astro.props;
+interface Props { locale: Locale; heading?: string; body?: string; level?: 1 | 2; showRegistration?: boolean }
+const { locale, level = 2, showRegistration = false } = Astro.props;
 const t = useTranslations(locale);
 const heading = Astro.props.heading ?? t("contact.heading");
 const body = Astro.props.body ?? t("contact.intro");
 const Heading = `h${level}` as "h1" | "h2";
+const hasFigure = Astro.slots.has("figure");
 ---
-<section class="contact">
+<section class:list={["contact", "on-dark", { "has-figure": hasFigure }]}>
   <div class="wrap layout">
+    {hasFigure && <div class="figure"><slot name="figure" /></div>}
     <div class="intro">
       <Heading>{heading}</Heading>
       <p>{body}</p>
     </div>
     <dl class="channels">
-      <div>
+      <div class="channel">
         <dt>{t("contact.mail")}</dt>
         <dd><a href={`mailto:${company.email}`}>{company.email}</a></dd>
       </div>
-      <div>
+      <div class="channel">
         <dt>{t("contact.call")}</dt>
         <dd><a href={company.phoneHref}>{company.phone}</a></dd>
       </div>
-      <div>
+      <div class="channel">
         <dt>{t("contact.visit")}</dt>
         <dd>
-          <address>{company.name}<br />{company.street}<br />{company.postalCode} {company.city}</address>
+          <address><a href={company.mapsHref} rel="noopener noreferrer">{company.street}<br />{company.postalCode} {company.city}</a></address>
         </dd>
       </div>
+      {showRegistration && (
+        <div class="channel">
+          <dt>{t("contact.registration")}</dt>
+          <dd>{company.kvk}</dd>
+        </div>
+      )}
     </dl>
   </div>
 </section>
@@ -36,8 +44,9 @@ const Heading = `h${level}` as "h1" | "h2";
 <style>
   .contact {
     padding-block: clamp(4rem, 9vw, 7.5rem);
-    background: var(--ink);
-    color: var(--paper);
+    --surface: var(--ink);
+    background: var(--surface);
+    color: #fff;
   }
 
   .layout {
@@ -55,47 +64,134 @@ const Heading = `h${level}` as "h1" | "h2";
   .intro p {
     max-width: 34rem;
     margin-top: 1.75rem;
-    color: var(--face-light);
+    color: var(--on-dark);
     font-size: var(--step-1);
     line-height: 1.5;
   }
 
   .channels {
     display: grid;
-    gap: 1.75rem;
+    gap: 2rem;
     margin: 0;
   }
 
+  /* Every channel has the same shape: a ruled line with a short accent tick, a label, a value. */
+  .channel {
+    position: relative;
+    padding-top: 1rem;
+    border-top: 1px solid rgb(255 255 255 / 0.16);
+  }
+
+  .channel::before {
+    content: "";
+    position: absolute;
+    top: -2px;
+    left: 0;
+    width: 1.5rem;
+    height: 3px;
+    background: var(--accent);
+  }
+
   dt {
-    color: var(--face-mid);
+    color: var(--sky);
     font-size: var(--step--1);
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
   }
 
   dd {
-    margin: 0.2rem 0 0;
-    font-size: var(--step-1);
-  }
-
-  dd a {
-    font-variation-settings: "wdth" 112;
-    font-weight: 650;
-    text-decoration-color: var(--rose);
-    text-decoration-thickness: 2px;
-    overflow-wrap: anywhere;
-  }
-
-  dd a:hover {
+    margin: 0.4rem 0 0;
     color: #fff;
-    text-decoration-thickness: 4px;
+    font-size: 1.25rem;
+    font-weight: 600;
+    line-height: 1.4;
   }
 
   address {
     font-style: normal;
-    line-height: 1.45;
+  }
+
+  dd a {
+    text-decoration: underline;
+    text-decoration-color: rgb(255 255 255 / 0.35);
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.25em;
+    overflow-wrap: anywhere;
+    transition: text-decoration-color 150ms ease;
+  }
+
+  dd a:hover {
+    text-decoration-color: var(--accent);
+    text-decoration-thickness: 2px;
+  }
+
+  /*
+   * With a figure (the contact page): the figure beside the heading, the channels in a row below,
+   * on near-black blue so the neon logo glows like a sign at night.
+   */
+  .has-figure {
+    --surface: #050a1a;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .has-figure::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='55.426' height='32' viewBox='0 0 55.426 32'%3E%3Cpath d='M0 0L55.426 32M0 32L55.426 0M0 0V32M27.713 0V32' stroke='%23142046' stroke-width='1' fill='none'/%3E%3C/svg%3E");
+    background-size: 55.426px 32px;
+    mask-image: radial-gradient(ellipse 45% 70% at 80% 35%, #000 15%, transparent 75%);
+    pointer-events: none;
+  }
+
+  .has-figure .layout {
+    position: relative;
+    grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+    grid-template-areas: "intro figure" "channels channels";
+    align-items: center;
+  }
+
+  .has-figure .intro {
+    grid-area: intro;
+  }
+
+  .figure {
+    grid-area: figure;
+    justify-self: center;
+    width: 100%;
+    max-width: 22rem;
+  }
+
+  .figure > :global(*) {
+    display: block;
+    width: 100%;
+  }
+
+  .has-figure .channels {
+    grid-area: channels;
+    grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
+    gap: 2rem 2.5rem;
+    margin-top: 1rem;
   }
 
   @media (max-width: 52rem) {
     .layout {
+      grid-template-columns: 1fr;
+    }
+
+    .has-figure .layout {
+      grid-template-columns: 1fr;
+      grid-template-areas: "figure" "intro" "channels";
+    }
+
+    .figure {
+      max-width: 11rem;
+      justify-self: start;
+    }
+
+    .has-figure .channels {
       grid-template-columns: 1fr;
     }
   }

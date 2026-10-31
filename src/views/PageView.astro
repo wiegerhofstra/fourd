@@ -1,7 +1,6 @@
 ---
 import Base from "../layouts/Base.astro";
 import ContactBand from "../components/ContactBand.astro";
-import ServiceIcon from "../components/ServiceIcon.astro";
 import type { PageProps } from "../lib/routes";
 import { path, useTranslations, type Locale } from "../lib/i18n";
 
@@ -15,10 +14,7 @@ const title = service?.title ?? page.title;
   <article>
     <header class="wrap head">
       {service && <a class="crumb" href={path("services", locale)}>{t("nav.services")}</a>}
-      <div class="title">
-        {service && <ServiceIcon slug={page.slug} class="icon" />}
-        <h1>{title}</h1>
-      </div>
+      <h1>{title}</h1>
       {service?.intro ? <div class="lead" set:html={service.intro} /> : service?.short && <p class="lead">{service.short}</p>}
     </header>
 
@@ -38,10 +34,7 @@ const title = service?.title ?? page.title;
       <ul>
         {otherServices.map((other) => other.page && (
           <li>
-            <a href={other.page.href}>
-              <ServiceIcon slug={other.page.slug} class="small-icon" />
-              {other.title}
-            </a>
+            <a href={other.page.href}>{other.title}</a>
           </li>
         ))}
       </ul>
@@ -61,20 +54,7 @@ const title = service?.title ?? page.title;
     margin-bottom: 1.5rem;
     color: var(--slate);
     font-weight: 600;
-    text-decoration-color: var(--rose);
-  }
-
-  .title {
-    display: flex;
-    align-items: center;
-    gap: 1.25rem;
-  }
-
-  .icon {
-    flex: none;
-    width: clamp(2.5rem, 6vw, 4rem);
-    height: auto;
-    color: var(--rose-deep);
+    text-decoration-color: var(--accent);
   }
 
   h1 {
@@ -101,7 +81,7 @@ const title = service?.title ?? page.title;
   }
 
   .cover {
-    --side: var(--face-mid);
+    --side: var(--extrude);
     margin: 0 12px 0 0;
     box-shadow:
       2px 1px 0 var(--side), 4px 2px 0 var(--side), 6px 3px 0 var(--side),
@@ -131,9 +111,6 @@ const title = service?.title ?? page.title;
   }
 
   .others a {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.6rem;
     font-size: var(--step-2);
     font-variation-settings: var(--display);
     font-weight: 750;
@@ -142,13 +119,8 @@ const title = service?.title ?? page.title;
 
   .others a:hover {
     text-decoration: underline;
-    text-decoration-color: var(--rose);
+    text-decoration-color: var(--accent);
     text-decoration-thickness: 3px;
-  }
-
-  .small-icon {
-    width: 1.4rem;
-    color: var(--rose-deep);
   }
 
   @media (max-width: 52rem) {

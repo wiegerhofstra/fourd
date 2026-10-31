@@ -1,0 +1,129 @@
+---
+import { logoFaces } from "../lib/logo";
+
+interface Props { class?: string }
+// `rest` carries the parent's scoped-style attribute so its styles reach this element.
+const { class: className, ...rest } = Astro.props;
+
+// The logo drawn as a technical drawing: construction lines are drafted, the white edges are traced
+// over them, and the faces are washed in. The construction stays, faintly.
+// Meant for cobalt or navy backgrounds; set --surface to the background colour.
+const step = { x: 0.866, y: 0.5 };
+const extend = (x1: number, y1: number, x2: number, y2: number, by: number) => {
+  const length = Math.hypot(x2 - x1, y2 - y1);
+  const [dx, dy] = [((x2 - x1) / length) * by, ((y2 - y1) / length) * by];
+  return { x1: x1 - dx, y1: y1 - dy, x2: x2 + dx, y2: y2 + dy };
+};
+const guides = [
+  extend(0.01, 4.76, 8.237, 0.01, 1.4),
+  extend(0.01, 6.66, 6.592, 10.46, 1.4),
+  extend(8.237, 13.41, 9.883, 12.46, 1.4),
+  extend(9.883, 0.96, 9.883, 12.46, 1.1),
+  extend(8.237, 0.01, 8.237, 13.41, 0.9),
+  extend(0.01, 4.76, 0.01, 6.66, 1.1),
+  extend(8.237, 0.01, 8.237 + step.x, 0.01 + step.y, 1.4),
+];
+const vertices = [[8.237, 0.01], [9.883, 0.96], [9.883, 12.46], [8.237, 13.41], [0.01, 4.76], [0.01, 6.66]];
+
+---
+<svg class:list={["blueprint", className]} {...rest} viewBox="-1.6 -1.2 13.1 15.8" aria-hidden="true">
+  <g class="guides">
+    {guides.map((line, index) => <line {...line} pathLength="1" style={`--i: ${index}`} />)}
+  </g>
+  <g class="faces">
+    {logoFaces.map((face) => <polygon class={face.name} points={face.points} style={`fill: ${face.fill}`} />)}
+  </g>
+  <g class="edges">
+    {logoFaces.map((face, index) => <polygon points={face.points} pathLength="1" style={`--i: ${index}`} />)}
+  </g>
+  <g class="vertices">
+    {vertices.map(([x, y], index) => <circle cx={x} cy={y} r="0.11" style={`--i: ${index}`} />)}
+  </g>
+</svg>
+
+<style>
+  .blueprint {
+    overflow: visible;
+  }
+
+  .guides line,
+  .edges polygon {
+    fill: none;
+    stroke-dasharray: 1;
+    stroke-dashoffset: 0;
+    stroke-linejoin: round;
+  }
+
+  .guides line {
+    stroke: var(--signal);
+    stroke-width: 0.025;
+    opacity: 0.45;
+  }
+
+  .edges polygon {
+    stroke: var(--logo-line);
+    stroke-width: 0.06;
+  }
+
+  .vertices circle {
+    fill: var(--surface, var(--cobalt));
+    stroke: var(--signal);
+    stroke-width: 0.03;
+  }
+
+  /*
+   * One entrance, about six seconds, like a drawing being made:
+   * 0–1.9s construction lines are drafted, 0.5–2.9s the edges are traced over them,
+   * 2.4s vertices are marked, 2.9–4.5s the faces are washed in,
+   * 4.8–6s the construction settles into the background and the vertex marks go.
+   */
+  @media (prefers-reduced-motion: no-preference) {
+    .guides line {
+      animation:
+        draw 1s cubic-bezier(0.6, 0, 0.2, 1) calc(var(--i) * 0.15s) both,
+        settle 1.2s ease-in-out 4.8s both;
+    }
+
+    .edges polygon {
+      animation: draw 1.8s cubic-bezier(0.6, 0, 0.2, 1) calc(0.5s + var(--i) * 0.3s) both;
+    }
+
+    .vertices circle {
+      animation:
+        appear 0.35s ease-out calc(2.4s + var(--i) * 0.08s) both,
+        fade-out 1.2s ease-in-out 4.8s forwards;
+    }
+
+    .faces polygon {
+      animation: appear 1s ease-out both;
+    }
+
+    .faces .top { animation-delay: 2.9s; }
+    .faces .side { animation-delay: 3.2s; }
+    .faces .front { animation-delay: 3.5s; }
+  }
+
+  /* Without motion, show the finished drawing. */
+  @media (prefers-reduced-motion: reduce) {
+    .vertices {
+      display: none;
+    }
+  }
+
+  /* While drafting the construction lines are bright; afterwards they recede. */
+  @keyframes settle {
+    from { opacity: 0.9; }
+  }
+
+  @keyframes fade-out {
+    to { opacity: 0; }
+  }
+
+  @keyframes draw {
+    from { stroke-dashoffset: 1; }
+  }
+
+  @keyframes appear {
+    from { opacity: 0; }
+  }
+</style>

@@ -1,32 +1,13 @@
 ---
 import { path, useTranslations, type Locale } from "../lib/i18n";
-import { logoFaces } from "../lib/logo";
+import BlueprintLogo from "./BlueprintLogo.astro";
 
 interface Props { locale: Locale }
 const { locale } = Astro.props;
 const t = useTranslations(locale);
 const phrases = t("hero.phrases");
-
-// The logo is drawn as a wireframe first, with construction lines along its isometric edges,
-// and then the real logo is laid on top. Once it has landed, the construction lines fade away.
-const step = { x: 0.866, y: 0.5 };
-const extend = (x1: number, y1: number, x2: number, y2: number, by: number) => {
-  const length = Math.hypot(x2 - x1, y2 - y1);
-  const [dx, dy] = [((x2 - x1) / length) * by, ((y2 - y1) / length) * by];
-  return { x1: x1 - dx, y1: y1 - dy, x2: x2 + dx, y2: y2 + dy };
-};
-const guides = [
-  extend(0.01, 4.76, 8.237, 0.01, 1.4),
-  extend(0.01, 6.66, 6.592, 10.46, 1.4),
-  extend(8.237, 13.41, 9.883, 12.46, 1.4),
-  extend(9.883, 0.96, 9.883, 12.46, 1.1),
-  extend(8.237, 0.01, 8.237, 13.41, 0.9),
-  extend(0.01, 4.76, 0.01, 6.66, 1.1),
-  extend(8.237, 0.01, 8.237 + step.x, 0.01 + step.y, 1.4),
-];
-const vertices = [[8.237, 0.01], [9.883, 0.96], [9.883, 12.46], [8.237, 13.41], [0.01, 4.76], [0.01, 6.66]];
 ---
-<section class="hero">
+<section class="hero on-dark">
   <div class="wrap layout">
     <div class="copy">
       <h1>
@@ -43,20 +24,7 @@ const vertices = [[8.237, 0.01], [9.883, 0.96], [9.883, 12.46], [8.237, 13.41], 
       </div>
     </div>
 
-    <svg class="figure" viewBox="-1.6 -1.2 13.1 15.8" aria-hidden="true">
-      <g class="guides">
-        {guides.map((line, index) => <line {...line} pathLength="1" style={`--i: ${index}`} />)}
-      </g>
-      <g class="wireframe">
-        {logoFaces.map((face, index) => <polygon points={face.points} pathLength="1" style={`--i: ${index}`} />)}
-      </g>
-      <g class="logo" stroke-linejoin="round" stroke-width="0.02">
-        {logoFaces.map((face) => <polygon class={face.name} points={face.points} fill={face.fill} stroke={face.fill} />)}
-      </g>
-      <g class="vertices">
-        {vertices.map(([x, y], index) => <circle cx={x} cy={y} r="0.11" style={`--i: ${index}`} />)}
-      </g>
-    </svg>
+    <BlueprintLogo class="figure" />
   </div>
 </section>
 
@@ -97,11 +65,14 @@ const vertices = [[8.237, 0.01], [9.883, 0.96], [9.883, 12.46], [8.237, 13.41], 
 </script>
 
 <style>
+  /* The hero is a sheet of blueprint paper with the logo drawn on it. */
   .hero {
+    --surface: var(--cobalt);
     position: relative;
     overflow: hidden;
     padding-block: clamp(3rem, 8vw, 7rem) clamp(4rem, 9vw, 8rem);
-    border-bottom: 1px solid var(--rule);
+    background: var(--surface);
+    color: #fff;
   }
 
   /* An isometric drafting grid, fading out towards the copy. */
@@ -109,7 +80,7 @@ const vertices = [[8.237, 0.01], [9.883, 0.96], [9.883, 12.46], [8.237, 13.41], 
     content: "";
     position: absolute;
     inset: 0;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='55.426' height='32' viewBox='0 0 55.426 32'%3E%3Cpath d='M0 0L55.426 32M0 32L55.426 0M0 0V32M27.713 0V32' stroke='%23c9d0dc' stroke-width='1' fill='none'/%3E%3C/svg%3E");
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='55.426' height='32' viewBox='0 0 55.426 32'%3E%3Cpath d='M0 0L55.426 32M0 32L55.426 0M0 0V32M27.713 0V32' stroke='%23ffffff' stroke-opacity='0.13' stroke-width='1' fill='none'/%3E%3C/svg%3E");
     background-size: 55.426px 32px;
     mask-image: radial-gradient(ellipse 60% 85% at 78% 50%, #000 15%, transparent 75%);
     pointer-events: none;
@@ -130,7 +101,7 @@ const vertices = [[8.237, 0.01], [9.883, 0.96], [9.883, 12.46], [8.237, 13.41], 
 
   .lead {
     display: block;
-    color: var(--slate);
+    color: var(--sky);
     font-weight: 500;
   }
 
@@ -156,7 +127,7 @@ const vertices = [[8.237, 0.01], [9.883, 0.96], [9.883, 12.46], [8.237, 13.41], 
     height: 0.82em;
     margin-left: 0.06em;
     vertical-align: -0.04em;
-    background: var(--rose);
+    background: var(--accent);
     animation: caret 1.1s steps(1) infinite;
   }
 
@@ -167,7 +138,7 @@ const vertices = [[8.237, 0.01], [9.883, 0.96], [9.883, 12.46], [8.237, 13.41], 
   .body {
     max-width: 33rem;
     margin-top: 2rem;
-    color: var(--slate);
+    color: var(--on-dark);
     font-size: var(--step-1);
     line-height: 1.5;
   }
@@ -183,82 +154,6 @@ const vertices = [[8.237, 0.01], [9.883, 0.96], [9.883, 12.46], [8.237, 13.41], 
     width: 100%;
     max-width: 30rem;
     justify-self: center;
-    overflow: visible;
-  }
-
-  .guides line,
-  .wireframe polygon {
-    fill: none;
-    stroke-dasharray: 1;
-    stroke-dashoffset: 0;
-  }
-
-  .guides line {
-    stroke: var(--rose);
-    stroke-width: 0.025;
-  }
-
-  .wireframe polygon {
-    stroke: var(--slate);
-    stroke-width: 0.04;
-    stroke-linejoin: round;
-  }
-
-  .vertices circle {
-    fill: var(--paper);
-    stroke: var(--rose);
-    stroke-width: 0.03;
-  }
-
-  /*
-   * One entrance, about five seconds, like a drawing being made:
-   * 0–1.9s construction lines are drafted one by one, 0.5–2.9s the wireframe is traced over them,
-   * 2.4s vertices are marked, 2.9–4.5s the logo's faces are laid on, 4.8–6s the construction fades.
-   */
-  @media (prefers-reduced-motion: no-preference) {
-    .guides line {
-      animation:
-        draw 1s cubic-bezier(0.6, 0, 0.2, 1) calc(var(--i) * 0.15s) both,
-        fade-out 1.2s ease-in-out 4.8s forwards;
-    }
-
-    .wireframe polygon {
-      animation: draw 1.8s cubic-bezier(0.6, 0, 0.2, 1) calc(0.5s + var(--i) * 0.3s) both;
-    }
-
-    .vertices circle {
-      animation:
-        appear 0.35s ease-out calc(2.4s + var(--i) * 0.08s) both,
-        fade-out 1.2s ease-in-out 4.8s forwards;
-    }
-
-    .logo polygon {
-      animation: appear 1s ease-out both;
-    }
-
-    .logo .top { animation-delay: 2.9s; }
-    .logo .side { animation-delay: 3.2s; }
-    .logo .front { animation-delay: 3.5s; }
-  }
-
-  /* Without motion, show the finished drawing: the logo without its construction. */
-  @media (prefers-reduced-motion: reduce) {
-    .guides,
-    .vertices {
-      display: none;
-    }
-  }
-
-  @keyframes fade-out {
-    to { opacity: 0; }
-  }
-
-  @keyframes draw {
-    from { stroke-dashoffset: 1; }
-  }
-
-  @keyframes appear {
-    from { opacity: 0; }
   }
 
   @media (max-width: 52rem) {

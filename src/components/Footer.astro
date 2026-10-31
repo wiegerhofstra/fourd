@@ -7,7 +7,7 @@ const { locale } = Astro.props;
 const t = useTranslations(locale);
 const year = new Date().getFullYear();
 ---
-<footer class="site-footer">
+<footer class="site-footer on-dark">
   <div class="wrap grid">
     <div class="brand">
       <LogoMark class="mark" />
@@ -35,7 +35,7 @@ const year = new Date().getFullYear();
   .site-footer {
     padding-block: 4rem 2rem;
     background: var(--ink);
-    color: var(--face-light);
+    color: var(--on-dark);
     font-size: var(--step--1);
   }
 
@@ -47,8 +47,8 @@ const year = new Date().getFullYear();
 
   .brand {
     display: flex;
-    align-items: flex-start;
-    gap: 0.75rem;
+    align-items: center;
+    gap: 0.7em;
     color: var(--paper);
     font-size: var(--step-1);
   }
@@ -58,9 +58,10 @@ const year = new Date().getFullYear();
     font-weight: 800;
   }
 
+  /* Sized against the wordmark, like the header, so logo and name stay in proportion. */
   .mark {
-    width: 1.4rem;
-    --logo-front: #8a8a8a;
+    flex: none;
+    width: 1.6em;
   }
 
   address {
@@ -89,8 +90,8 @@ const year = new Date().getFullYear();
   .legal {
     margin-top: 3.5rem;
     padding-top: 1.5rem;
-    border-top: 1px solid #434c5e;
-    color: var(--face-mid);
+    border-top: 1px solid rgb(255 255 255 / 0.15);
+    color: var(--sky);
   }
 
   @media (max-width: 48rem) {

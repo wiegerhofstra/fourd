@@ -2,7 +2,7 @@
 import { Image } from "astro:assets";
 import Base from "../layouts/Base.astro";
 import Hero from "../components/Hero.astro";
-import ServiceTiles from "../components/ServiceTiles.astro";
+import ServiceList from "../components/ServiceList.astro";
 import ContactBand from "../components/ContactBand.astro";
 import CmsError from "../components/CmsError.astro";
 import { getServices } from "../lib/cms";
@@ -24,7 +24,7 @@ const services = await attempt(() => getServices(locale));
         <h2 id="services-title">{t("services.title")}</h2>
         <a class="all" href={path("services", locale)}>{t("services.all")}</a>
       </div>
-      {services.ok ? <ServiceTiles services={services.value} locale={locale} /> : <CmsError locale={locale} />}
+      {services.ok ? <ServiceList services={services.value} locale={locale} /> : <CmsError locale={locale} />}
     </div>
   </section>
 
@@ -75,7 +75,7 @@ const services = await attempt(() => getServices(locale));
 
   .all {
     font-weight: 600;
-    text-decoration-color: var(--rose);
+    text-decoration-color: var(--accent);
     text-decoration-thickness: 2px;
   }
 
@@ -115,7 +115,7 @@ const services = await attempt(() => getServices(locale));
 
   .strip a:hover span {
     text-decoration: underline;
-    text-decoration-color: var(--rose);
+    text-decoration-color: var(--accent);
     text-decoration-thickness: 2px;
   }
 

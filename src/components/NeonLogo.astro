@@ -1,0 +1,167 @@
+---
+import { logoFaces } from "../lib/logo";
+
+interface Props { class?: string }
+// `rest` carries the parent's scoped-style attribute so its styles reach this element.
+const { class: className, ...rest } = Astro.props;
+
+// The logo is drafted first: construction lines along its isometric edges, then its neon edges are
+// traced and the dark faces fill in behind them. The neon switches on, and the construction fades away.
+// Meant for dark backgrounds.
+const step = { x: 0.866, y: 0.5 };
+const extend = (x1: number, y1: number, x2: number, y2: number, by: number) => {
+  const length = Math.hypot(x2 - x1, y2 - y1);
+  const [dx, dy] = [((x2 - x1) / length) * by, ((y2 - y1) / length) * by];
+  return { x1: x1 - dx, y1: y1 - dy, x2: x2 + dx, y2: y2 + dy };
+};
+const guides = [
+  extend(0.01, 4.76, 8.237, 0.01, 1.4),
+  extend(0.01, 6.66, 6.592, 10.46, 1.4),
+  extend(8.237, 13.41, 9.883, 12.46, 1.4),
+  extend(9.883, 0.96, 9.883, 12.46, 1.1),
+  extend(8.237, 0.01, 8.237, 13.41, 0.9),
+  extend(0.01, 4.76, 0.01, 6.66, 1.1),
+  extend(8.237, 0.01, 8.237 + step.x, 0.01 + step.y, 1.4),
+];
+const vertices = [[8.237, 0.01], [9.883, 0.96], [9.883, 12.46], [8.237, 13.41], [0.01, 4.76], [0.01, 6.66]];
+---
+<svg class:list={["neon", className]} {...rest} viewBox="-1.6 -1.2 13.1 15.8" aria-hidden="true">
+  <defs>
+    <filter id="neon-glow" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="0.12" result="near" />
+      <feGaussianBlur stdDeviation="0.45" result="far" />
+      <feMerge>
+        <feMergeNode in="far" />
+        <feMergeNode in="near" />
+      </feMerge>
+    </filter>
+  </defs>
+  <g class="guides">
+    {guides.map((line, index) => <line {...line} pathLength="1" style={`--i: ${index}`} />)}
+  </g>
+  <g class="faces">
+    {logoFaces.map((face) => <polygon class={face.name} points={face.points} style={`fill: ${face.fill}; stroke: ${face.fill}`} />)}
+  </g>
+  <g class="glow" filter="url(#neon-glow)">
+    {logoFaces.map((face) => <polygon points={face.points} style={`stroke: ${face.line}`} />)}
+  </g>
+  <g class="edges">
+    {logoFaces.map((face, index) => <polygon points={face.points} pathLength="1" style={`stroke: ${face.line}; --i: ${index}`} />)}
+  </g>
+  <g class="vertices">
+    {vertices.map(([x, y], index) => <circle cx={x} cy={y} r="0.11" style={`--i: ${index}`} />)}
+  </g>
+</svg>
+
+<style>
+  /* Dark faces with frost and rose edges (Nord polar night, frost and aurora), whatever the site's logo colours. */
+  .neon {
+    --logo-top: #3b4252;
+    --logo-side: #434c5e;
+    --logo-front: #2b303b;
+    --logo-line: #88c0d0;
+    --logo-accent: #bf616a;
+    overflow: visible;
+  }
+
+  .guides line,
+  .edges polygon {
+    fill: none;
+    stroke-dasharray: 1;
+    stroke-dashoffset: 0;
+    stroke-linejoin: round;
+  }
+
+  .guides line {
+    stroke: var(--logo-accent);
+    stroke-width: 0.025;
+    opacity: 0.8;
+  }
+
+  .faces polygon {
+    stroke-width: 0.02;
+    stroke-linejoin: round;
+  }
+
+  .edges polygon {
+    stroke-width: 0.07;
+  }
+
+  .glow polygon {
+    fill: none;
+    stroke-width: 0.12;
+    stroke-linejoin: round;
+  }
+
+  .vertices circle {
+    fill: var(--surface, #2e3440); /* the background behind the logo */
+    stroke: var(--logo-accent);
+    stroke-width: 0.03;
+  }
+
+  /*
+   * One entrance, about six seconds, like a neon sign being made and switched on:
+   * 0–1.9s construction lines are drafted, 0.5–2.9s the edges are traced over them,
+   * 2.4s vertices are marked, 2.9–4.5s the dark faces fill in, 4.6s the glow flickers on,
+   * 4.8–6s the construction fades.
+   */
+  @media (prefers-reduced-motion: no-preference) {
+    .guides line {
+      animation:
+        draw 1s cubic-bezier(0.6, 0, 0.2, 1) calc(var(--i) * 0.15s) both,
+        fade-out 1.2s ease-in-out 4.8s forwards;
+    }
+
+    .edges polygon {
+      animation: draw 1.8s cubic-bezier(0.6, 0, 0.2, 1) calc(0.5s + var(--i) * 0.3s) both;
+    }
+
+    .vertices circle {
+      animation:
+        appear 0.35s ease-out calc(2.4s + var(--i) * 0.08s) both,
+        fade-out 1.2s ease-in-out 4.8s forwards;
+    }
+
+    .faces polygon {
+      animation: appear 1s ease-out both;
+    }
+
+    .faces .top { animation-delay: 2.9s; }
+    .faces .side { animation-delay: 3.2s; }
+    .faces .front { animation-delay: 3.5s; }
+
+    .glow {
+      animation: switch-on 0.9s linear 4.6s both;
+    }
+  }
+
+  /* Without motion, show the finished logo, lit, without its construction. */
+  @media (prefers-reduced-motion: reduce) {
+    .guides,
+    .vertices {
+      display: none;
+    }
+  }
+
+  /* A neon tube catching: two short flickers, then steady. */
+  @keyframes switch-on {
+    0% { opacity: 0; }
+    10% { opacity: 0.9; }
+    16% { opacity: 0.1; }
+    30% { opacity: 0.8; }
+    36% { opacity: 0.2; }
+    55%, 100% { opacity: 1; }
+  }
+
+  @keyframes fade-out {
+    to { opacity: 0; }
+  }
+
+  @keyframes draw {
+    from { stroke-dashoffset: 1; }
+  }
+
+  @keyframes appear {
+    from { opacity: 0; }
+  }
+</style>

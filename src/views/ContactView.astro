@@ -1,6 +1,7 @@
 ---
 import Base from "../layouts/Base.astro";
 import ContactBand from "../components/ContactBand.astro";
+import NeonLogo from "../components/NeonLogo.astro";
 import { path, useTranslations, type Locale } from "../lib/i18n";
 
 interface Props { locale: Locale }
@@ -8,6 +9,8 @@ const { locale } = Astro.props;
 const t = useTranslations(locale);
 ---
 <Base locale={locale} section="contact" title={t("contact.title")} description={t("contact.intro")} alternates={{ nl: path("contact", "nl"), en: path("contact", "en") }}>
-  <ContactBand locale={locale} level={1} body={`${t("contact.intro")} ${t("contact.response")}`} />
+  <ContactBand locale={locale} level={1} showRegistration body={`${t("contact.intro")} ${t("contact.response")}`}>
+    <NeonLogo slot="figure" />
+  </ContactBand>
 </Base>
 

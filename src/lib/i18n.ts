@@ -39,6 +39,8 @@ export const company = {
   street: "De Remize 26",
   postalCode: "9051 WB",
   city: "Stiens",
+  mapsHref: "https://www.google.com/maps/search/?api=1&query=De+Remize+26%2C+9051+WB+Stiens",
+  kvk: "52379787",
   linkedin: "https://www.linkedin.com/company/fourd-software",
 };
 
@@ -78,6 +80,7 @@ const dictionary = {
     "contact.mail": "Mail ons",
     "contact.visit": "Kom langs",
     "contact.response": "Je hoort snel van ons.",
+    "contact.registration": "KvK-nummer",
     "footer.rights": "Alle rechten voorbehouden.",
     "error.title": "Deze pagina bestaat niet",
     "error.body": "De link is misschien verouderd of de pagina is verplaatst. Ga terug naar de homepage of bekijk onze diensten.",
@@ -120,6 +123,7 @@ const dictionary = {
     "contact.mail": "Email us",
     "contact.visit": "Visit us",
     "contact.response": "You'll hear from us soon.",
+    "contact.registration": "Chamber of Commerce (KvK)",
     "footer.rights": "All rights reserved.",
     "error.title": "This page doesn't exist",
     "error.body": "The link may be outdated or the page has moved. Go back to the homepage or see our services.",

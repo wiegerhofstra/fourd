@@ -6,17 +6,15 @@ interface Props { class?: string; title?: string }
 const { class: className, title, ...rest } = Astro.props;
 ---
 <svg class={className} {...rest} viewBox={`0 0 ${logoViewBox.width} ${logoViewBox.height}`} role={title ? "img" : undefined} aria-hidden={title ? undefined : "true"} aria-label={title}>
-  <g stroke-linejoin="round" stroke-width="0.02">
-    {logoFaces.map((face) => <polygon points={face.points} fill={face.fill} stroke={face.fill} />)}
-  </g>
-  <!-- Thin edges keep the light face visible on light backgrounds; set --logo-edge to enable them. -->
-  <g class="edges" fill="none" stroke-linejoin="round" style="stroke: var(--logo-edge, none)">
-    {logoFaces.map((face) => <polygon points={face.points} vector-effect="non-scaling-stroke" />)}
-  </g>
+  {logoFaces.map((face) => <polygon points={face.points} style={`fill: ${face.fill}; stroke: ${face.fill}`} stroke-width="0.02" stroke-linejoin="round" />)}
+  <!-- At small sizes the edges keep a fixed pixel width so they stay crisp. -->
+  {logoFaces.map((face) => <polygon class="edge" points={face.points} style={`stroke: ${face.line}`} vector-effect="non-scaling-stroke" />)}
 </svg>
 
 <style>
-  .edges {
-    stroke-width: var(--logo-edge-width, 1px);
+  .edge {
+    fill: none;
+    stroke-width: var(--logo-line-width, 1.25px);
+    stroke-linejoin: round;
   }
 </style>

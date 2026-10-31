@@ -1,6 +1,7 @@
 {
   "formatVersion": "1.1.0",
   "tenant": {
+    "consumerType": "astro",
     "name": "FourD",
     "slug": "fourd",
     "defaultLocale": "nl",
@@ -189,11 +190,13 @@
       ]
     }
   ],
-  "schemaHash": "e770c7772dac9e580671f2b13d3de4fe5246a7bfcd09c97c89d03b462b0bdbbf",
+  "schemaHash": "87ae957a8a11b2a4282be7df6ac228e4d9369dad54be668c70404a7118dad840",
   "origin": "https://cms.fourd.nl",
-  "revalidation": {
-    "configured": false,
-    "url": null
+  "consumerType": "astro",
+  "revalidation": null,
+  "rebuild": {
+    "provider": "coolify",
+    "configured": true
   },
   "examplesAreSynthetic": true
 }

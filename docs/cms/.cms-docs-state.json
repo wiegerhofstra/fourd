@@ -1,18 +1,17 @@
 {
   "version": 1,
   "source": "https://cms.fourd.nl/api/integration/fourd/v1",
-  "contentHash": "76c7e2dc46f55859b54d9032701c775c5b76931df6686fde0f344c9ebea10f97",
+  "contentHash": "41e5ba46dea28e2cf1b6cb00e3418fd0cc1a2ad2e431d9e8e6b11070dffa502b",
   "files": {
-    "INTEGRATION.md": "5c6a50575a0a74243e933fbfa908ab217aa6b8b9c1c82e0f9684de518ae3bf2d",
+    "INTEGRATION.md": "9455bcdc0e518e989463d96b4244b0850cc79436dc7a9ae23919bd2dea41eb55",
     "client.ts": "84f180cfa3f60acddf9c636116bcd3bbf1b6073d9a31968826fa541221056221",
-    "examples/media-route.ts": "dd7da8b89742e5457ee19c3e1af8b04d9ecc978d30f6b370b1bdb56cd200b8eb",
+    "examples/astro-pages.astro": "805be2692db2f18ee8448d2218437c5705ffd37a81839d3d3431db0601ea2767",
+    "examples/astro.config.mjs": "8cc874cd790133ccf619f50ada404d3b52839f306661f1eae15207355f0af2e8",
     "examples/responses.json": "7176d026c11ceed7e06bef8a3e453cd70de67c324d055a5bc2e72d9aa6c4fe53",
-    "examples/revalidate-route.ts": "ebe0d00307bb268cb55709e9a689922f8ef460c305d5e4b2d87b4e6699b83788",
     "examples/usage.ts": "26bc5092019bce754cb6af730204eb4724a2fbaa5eebba91db73c40c95cbb395",
-    "manifest.json": "0079ace5f6d932674098046b2bd27086538cef189243c3635784900f8de552c4",
-    "models.schema.json": "20c48848e1dd76e84cac90a429e8b0df842447b8e5b0bd7f349f710c81d76ae9",
-    "openapi.json": "627d2542fea271941bdccf06e1cc4890b1afb427c55f437fa482301b5ddac475",
-    "revalidation.ts": "6f3440060929ab0280af0909bb85920de84fa51392b07d79ce0a1e3740304ed6",
+    "manifest.json": "93fde6a7299cd374f6e5605268485e30fdec0185a4e3c63d42b77989e91fe578",
+    "models.schema.json": "10ab2411aae42d086c9615348d072f95dcdeedd1b482831cdb8d15b4cafb5c43",
+    "openapi.json": "62304222af71b1889e3e6d61dafa3997198e39522b5f2d4d7f7db8b446c02129",
     "rich-text.ts": "c27f53024616f3ce1c04a4db96f9cff72776d1226ba61f9f65128dada8e15925",
     "types.ts": "8ca862917f4282e3987474ead970bec5b4d570848fd1ba2ba684f02661d0a776"
   }

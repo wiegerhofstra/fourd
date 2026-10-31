@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "FourD — delivered CMS entries",
-  "x-cms-schemaHash": "e770c7772dac9e580671f2b13d3de4fe5246a7bfcd09c97c89d03b462b0bdbbf",
+  "x-cms-schemaHash": "87ae957a8a11b2a4282be7df6ac228e4d9369dad54be668c70404a7118dad840",
   "anyOf": [
     {
       "$ref": "#/$defs/Entry_4b7dbfbbeaab44d7bd4a8ef1b97d6c0f"

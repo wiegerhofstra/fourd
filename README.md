@@ -1,8 +1,9 @@
 # FourD website
 
 Astro builds the Dutch and English website into static files in `dist/`. CMS content,
-page routes, navigation, and media are fetched during the build. Production needs only
-a static web server: no Node process, CMS requests, database, or persistent volume.
+page routes, and navigation are fetched during the build. Production needs only a static
+web server: no Node process, database, or persistent volume. Images and downloads link
+directly to their stable CMS URLs.
 
 ## Local development
 
@@ -59,7 +60,7 @@ prefix it with `PUBLIC_`. No runtime environment variables are required. Remove 
 Set the HTTPS domain in Coolify and point DNS at the deployment server. In
 General → Build pipeline → Custom Nginx configuration, use `deploy/nginx.conf`.
 It serves nested routes, returns a real 404 (including an English error page), enables
-compression, caches build assets and CMS media for a year, and revalidates HTML.
+compression, caches build assets for a year, and revalidates HTML.
 Preserve any infrastructure-specific directives required by your Coolify installation.
 Do not configure an SPA fallback to `/index.html`; this is a multipage website.
 A health check can request `/` on port 80 without contacting the CMS.
@@ -68,24 +69,31 @@ See [Coolify's Railpack guide](https://coolify.io/docs/applications/builds/railp
 
 ## Publishing content
 
-After editing or publishing in the CMS, trigger a fresh Coolify build and deployment.
-For content-only changes, use **Force deploy (without cache)**: Coolify can otherwise
-reuse the image for an unchanged Git commit, and build caches can reuse old CMS output.
-Restarting an existing container does not update content.
+After publishing, editing, moving, unpublishing or deleting content, click **Rebuild** in
+the CMS. Publishing does not queue a build automatically, so batch changes and rebuild once;
+changes made while a build runs may need another rebuild. The CMS reports "build queued"
+once Coolify accepts the deployment; it does not wait for the build. Follow the deployment
+in Coolify: on failure the previous site stays live. After a timeout, check Coolify before
+retrying, because a deployment may already have started.
 
-The old `/api/revalidate` endpoint has been removed. Disable its configuration in the
-CMS. A future deployment webhook would need to trigger a fresh build, not cache
-invalidation. The CMS's manual Revalidate action is not automatically compatible
-with Coolify's deployment API.
+The Rebuild button calls Coolify's deploy webhook with `force=true`, so an unchanged Git
+commit still produces fresh HTML. A CMS administrator configures it once: select Astro under
+Settings → Tenants, then under Settings → Website save this application's **Deploy Webhook**
+(the resource webhook with this application's UUID, not a tag webhook) and a Coolify API token
+with deploy permission. Enable Coolify API access if needed. That token belongs only in the
+CMS, never in this repository or the application's environment.
 
-CMS/API or asset download errors fail the build instead of publishing incomplete
-pages. The already deployed site remains independent of CMS availability. Downloads
-are saved as `/media/<asset-id>.<extension>`, so the site never links to CMS file URLs and
-keeps working while the CMS is unavailable. Removing an asset in the CMS does not erase copies
-in old deployments or browser caches; a new build removes unused files from the new output.
-`/media/` is cached as immutable because an asset ID's bytes never change: a replaced file gets
-a new ID and URL. Do not put a shared cache or CDN in front of `/media/` without revisiting this,
-or files removed from the CMS stay publicly reachable there for up to a year.
+To deploy manually instead, use **Force deploy (without cache)** in Coolify. A normal deploy
+can reuse the image for an unchanged Git commit, and build caches can reuse old CMS output.
+Restarting an existing container does not update content. There is no `/api/revalidate`
+endpoint and no runtime cache to invalidate.
+
+CMS/API errors fail the build instead of publishing incomplete pages. Pages stay online
+while the CMS is unavailable, but images and downloads are served by the CMS from their
+stable asset URLs, so they need the CMS to be up. The CMS checks each request, so deleting
+an asset takes effect immediately, without a rebuild. Rebuild after the CMS's media signing
+secret is rotated, because the old URLs in the deployed HTML stop working. There is no
+`/media/` route on this site; do not proxy or cache CMS files as public or immutable.
 
 All published page entries are generated in both languages, including child pages
 expanded in services and menus. Localized slugs and language-switch links are retained.

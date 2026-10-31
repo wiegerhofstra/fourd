@@ -3,9 +3,9 @@
 // `npm run cms:docs`; they are imported from there so a refresh updates the integration directly.
 import { CMS_ACCESS_TOKEN, CMS_TENANT_SLUG, CMS_URL } from "astro:env/server";
 import { createCmsClient } from "../../docs/cms/client";
-import { renderRichText } from "../../docs/cms/rich-text";
+import { renderRichText, safeHref } from "../../docs/cms/rich-text";
 import { isExpandedEntry, modelSlugById, type DeliveryAsset, type DeliveryEntry } from "../../docs/cms/types";
-import { locales, localize, type Locale } from "./i18n";
+import { localize, type Locale } from "./i18n";
 
 export const cms = createCmsClient({ origin: CMS_URL, tenantSlug: CMS_TENANT_SLUG, token: CMS_ACCESS_TOKEN });
 
@@ -33,7 +33,8 @@ function text(value: unknown): string | null {
 
 function richText(value: unknown): string | null {
   if (!value || typeof value !== "object" || Array.isArray(value)) return null;
-  const html = renderRichText(value, { assetUrl: mediaUrl });
+  // Assets and asset links use the CMS's stable file URLs.
+  const html = renderRichText(value);
   return html.replace(/<p>(<br>)?<\/p>/g, "").trim() || null;
 }
 
@@ -41,28 +42,9 @@ function image(value: unknown): Image | null {
   if (!value || typeof value !== "object" || !("id" in value) || typeof value.id !== "string") return null;
   const raw = value as DeliveryAsset;
   if (typeof raw.mimeType !== "string" || !raw.mimeType.startsWith("image/")) return null;
-  return { src: mediaUrl(raw), width: raw.imageWidth ?? undefined, height: raw.imageHeight ?? undefined };
-}
-
-// Extensions let a static web server select the correct MIME type. Unknown/active document
-// formats use .bin so they download instead of executing as pages on the website's origin.
-const mediaExtensions: Record<string, string> = {
-  "image/jpeg": "jpg", "image/png": "png", "image/webp": "webp", "image/avif": "avif",
-  "image/gif": "gif", "image/svg+xml": "svg", "image/bmp": "bmp", "image/x-icon": "ico",
-  "application/pdf": "pdf", "video/mp4": "mp4", "video/webm": "webm",
-  "audio/mpeg": "mp3", "audio/ogg": "ogg", "audio/wav": "wav",
-};
-
-export function mediaFilename(asset: DeliveryAsset) {
-  if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(asset.id)) {
-    throw new Error("CMS returned an invalid asset ID");
-  }
-  return asset.id + "." + (mediaExtensions[asset.mimeType] ?? "bin");
-}
-
-/** A local file emitted by the static media endpoint during the build. */
-export function mediaUrl(asset: DeliveryAsset) {
-  return "/media/" + mediaFilename(asset);
+  const src = safeHref(raw.url);
+  if (!src) return null;
+  return { src, width: raw.imageWidth ?? undefined, height: raw.imageHeight ?? undefined };
 }
 
 // --- Content -------------------------------------------------------------------------------------
@@ -117,27 +99,13 @@ function snapshot(locale: Locale) {
       all("page", locale, 1), all("service", locale, 2), all("menu", locale, 2),
     ]);
     const pageEntries = new Map<string, DeliveryEntry>();
-    const assets = new Map<string, DeliveryAsset>();
-    const assetLinks: Record<string, unknown>[] = [];
     visit([pages, services, menus], (record) => {
       // Collections omit component children; service and menu expansions include those pages.
       if (isExpandedEntry(record) && modelSlugById[record.modelId] === "page") {
         pageEntries.set(record.id, record);
       }
-      if (typeof record.id === "string" && typeof record.mimeType === "string" && typeof record.url === "string") {
-        assets.set(record.id, record as DeliveryAsset);
-      }
-      if (record.kind === "asset" && typeof record.assetId === "string" && typeof record.href === "string" && !record.missing) {
-        assetLinks.push(record);
-      }
     });
-    // Link marks have an asset ID and durable download URL but no embedded asset metadata.
-    for (const link of assetLinks) {
-      const id = link.assetId as string;
-      if (!assets.has(id)) assets.set(id, (await cms.getAsset(id)).data);
-      link.href = mediaUrl(assets.get(id)!);
-    }
-    return { pageEntries: [...pageEntries.values()], services, menus, assets: [...assets.values()] };
+    return { pageEntries: [...pageEntries.values()], services, menus };
   });
 }
 
@@ -148,12 +116,6 @@ export async function getPages(locale: Locale): Promise<Page[]> {
     if (entry.url && !page) throw new Error(`CMS page ${entry.id} is missing a usable title`);
     return page ? [page] : [];
   });
-}
-
-/** Deduplicate media across languages; files are immutable for a given CMS asset ID. */
-export async function getAssets(): Promise<DeliveryAsset[]> {
-  const snapshots = await Promise.all(locales.map(snapshot));
-  return [...new Map(snapshots.flatMap(({ assets }) => assets.map((asset) => [asset.id, asset] as const))).values()];
 }
 
 /** Services in the order editors created them (the API returns newest first), with their linked page. */

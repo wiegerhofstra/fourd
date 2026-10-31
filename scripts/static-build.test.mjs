@@ -6,7 +6,7 @@ import { join } from 'node:path';
 import { test } from 'node:test';
 
 // Exercise the real Astro build against a deterministic CMS, without production credentials.
-test('static builds include localized pages and media, and reject incomplete CMS content', async (t) => {
+test('static builds include localized pages and CMS media links, and reject incomplete CMS content', async (t) => {
   // Astro moves prerendered assets with rename(), so output must be on the project filesystem.
   await mkdir('.astro', { recursive: true });
   const output = await mkdtemp(join(process.cwd(), '.astro', 'static-test-'));
@@ -18,22 +18,19 @@ test('static builds include localized pages and media, and reject incomplete CMS
   };
   const imageId = '11111111-1111-4111-8111-111111111111';
   const pdfId = '22222222-2222-4222-8222-222222222222';
-  const imageBytes = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+a7V8AAAAASUVORK5CYII=', 'base64');
-  const pdfBytes = Buffer.from('%PDF-1.4\nsynthetic download\n%%EOF');
   const requests = [];
   let failure = null;
-  const failedOnce = new Set();
   let origin;
   const entry = (id, model, url, data) => ({
     id, modelId: modelIds[model], url, data, status: 'published', pageParentId: null,
     createdAt: '2026-01-01T00:00:00Z', updatedAt: '2026-01-01T00:00:00Z', publishedAt: '2026-01-01T00:00:00Z',
   });
-  // Asset url and downloadUrl are the same stable CMS file URL.
-  const fileUrl = (id) => `${origin}/files/${id}?signature=must-not-be-published`;
+  // Asset url and downloadUrl are the same stable CMS file URL, published as-is in the HTML.
+  const fileUrl = (id) => `${origin}/files/${id}?signature=stable`;
   const asset = (id) => ({
     id, mimeType: id === imageId ? 'image/png' : 'application/pdf',
     originalName: id === imageId ? 'example.png' : 'brochure.pdf',
-    sizeBytes: id === imageId ? imageBytes.length : pdfBytes.length,
+    sizeBytes: 64,
     imageWidth: id === imageId ? 1 : null, imageHeight: id === imageId ? 1 : null,
     url: fileUrl(id),
     downloadUrl: fileUrl(id),
@@ -45,18 +42,7 @@ test('static builds include localized pages and media, and reject incomplete CMS
       res.writeHead(status, { 'Content-Type': 'application/json' });
       res.end(JSON.stringify(data));
     };
-    if (url.pathname.startsWith('/files/')) {
-      const id = url.pathname.split('/').at(-1);
-      // Every file is briefly unavailable once; the build must retry rather than fail.
-      if (failure === 'asset' || !failedOnce.has(id)) {
-        failedOnce.add(id);
-        return json({ error: { message: 'Unavailable file' } }, 503);
-      }
-      res.writeHead(200, { 'Content-Type': id === imageId ? 'image/png' : 'application/pdf' });
-      return res.end(id === imageId ? imageBytes : pdfBytes);
-    }
     if (req.headers.authorization !== `Bearer ${token}`) return json({ error: { message: 'Unauthorized' } }, 401);
-    if (url.pathname.includes('/assets/')) return json({ data: asset(url.pathname.split('/').at(-1)) });
     const model = /\/models\/(page|service|menu)\/entries$/.exec(url.pathname)?.[1];
     if (!model) return json({ error: { message: 'Unknown request' } }, 404);
     if (failure === 'cms' && model === 'menu') return json({ error: { message: 'CMS unavailable' } }, 503);
@@ -119,31 +105,24 @@ test('static builds include localized pages and media, and reject incomplete CMS
   const page = await readFile(join(good.directory, 'ouder/kind/index.html'), 'utf8');
   assert.match(page, /Geneste Nederlandse pagina/);
   assert.ok(page.includes('https://static.example/en/parent/child'));
-  assert.ok(page.includes(`/media/${imageId}.png`));
-  assert.ok(page.includes(`/media/${pdfId}.pdf`));
-  assert.deepEqual(await readFile(join(good.directory, `media/${imageId}.png`)), imageBytes);
-  assert.deepEqual(await readFile(join(good.directory, `media/${pdfId}.pdf`)), pdfBytes);
+  assert.ok(page.includes(fileUrl(imageId)));
+  assert.ok(page.includes(fileUrl(pdfId)));
   const redirect = await readFile(join(good.directory, 'diensten/applicaties/index.html'), 'utf8');
   assert.match(redirect, /http-equiv="refresh"/);
   assert.match(redirect, /url=\/mobile-apps/);
   assert.ok(requests.some((path) => path.includes('cursor=page-2')), 'Pagination must be followed');
-  assert.equal(requests.filter((path) => path.startsWith('/files/')).length, 4, 'Each asset should download once across locales, after one retry');
+  assert.equal(requests.some((path) => path.startsWith('/files/')), false, 'Media is linked, not downloaded');
   for (const file of await readdir(good.directory, { recursive: true, withFileTypes: true })) {
     if (!file.isFile()) continue;
     const body = await readFile(join(file.parentPath, file.name));
-    for (const forbidden of [token, 'signature=must-not-be-published', `${origin}/files/`]) {
-      assert.equal(body.includes(Buffer.from(forbidden)), false, `${file.name} contains private or remote build data`);
-    }
+    assert.equal(body.includes(Buffer.from(token)), false, `${file.name} contains the CMS token`);
   }
   await assert.rejects(readFile(join(good.directory, 'server/entry.mjs')));
   await assert.rejects(readFile(join(good.directory, 'api/revalidate')));
+  await assert.rejects(readdir(join(good.directory, 'media')));
 
   failure = 'cms';
   const badCms = await build('bad-cms');
   assert.notEqual(badCms.code, 0, 'CMS failures must fail deployment builds');
   assert.match(badCms.log, /CMS unavailable/);
-  failure = 'asset';
-  const badAsset = await build('bad-asset');
-  assert.notEqual(badAsset.code, 0, 'Missing assets must fail deployment builds');
-  assert.match(badAsset.log, /Could not download CMS asset/);
 });

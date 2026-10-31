@@ -59,7 +59,7 @@ prefix it with `PUBLIC_`. No runtime environment variables are required. Remove 
 Set the HTTPS domain in Coolify and point DNS at the deployment server. In
 General → Build pipeline → Custom Nginx configuration, use `deploy/nginx.conf`.
 It serves nested routes, returns a real 404 (including an English error page), enables
-compression, caches hashed build assets for a year, and revalidates HTML and CMS media.
+compression, caches build assets and CMS media for a year, and revalidates HTML.
 Preserve any infrastructure-specific directives required by your Coolify installation.
 Do not configure an SPA fallback to `/index.html`; this is a multipage website.
 A health check can request `/` on port 80 without contacting the CMS.
@@ -82,8 +82,10 @@ CMS/API or asset download errors fail the build instead of publishing incomplete
 pages. The already deployed site remains independent of CMS availability. Downloads
 are saved as `/media/<asset-id>.<extension>`, so the site never links to CMS file URLs and
 keeps working while the CMS is unavailable. Removing an asset in the CMS does not erase copies
-in old deployments; a new build removes unused files from the new output, and because
-`/media/` responses are revalidated, browsers and caches stop serving them after deployment.
+in old deployments or browser caches; a new build removes unused files from the new output.
+`/media/` is cached as immutable because an asset ID's bytes never change: a replaced file gets
+a new ID and URL. Do not put a shared cache or CDN in front of `/media/` without revisiting this,
+or files removed from the CMS stay publicly reachable there for up to a year.
 
 All published page entries are generated in both languages, including child pages
 expanded in services and menus. Localized slugs and language-switch links are retained.
